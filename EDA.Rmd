@@ -1,9 +1,13 @@
 ---
 title: "EDA"
 output: html_document
+date: 2025-01-30
 ---
 
+#Load packages
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
+#Load datasets
