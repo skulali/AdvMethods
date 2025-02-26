@@ -84,8 +84,37 @@ sum(duplicated(eqi_df$fips))
 #no duplicate counties in the eqi_df
 
 length(unique(eqi_df$state_abbr))
-#51 states because it includes Washington, DC
+unique(eqi_df$state_abbr)
+#51 states because it includes DC
 
+
+```
+
+#Load and Clean County Health Data
+```{r}
+#Load county health data; clean up names and select interested variables
+ch_raw <- read_xlsx(path = "data/2015 County Health Rankings Data.xlsx", sheet = 4, 
+                   skip =1, range = "A2:FE3143")
+
+ch_df <- ch_raw |> 
+  rename(state_names = "State",
+         unrealiable_bw = "Unreliable",
+         num_low_birthweight_births = "# Low Birthweight Births",
+         num_live_births = "# Live births",
+         perc_low_bw = "% LBW",
+         fips = "FIPS") |> 
+  select(fips, state_names, unrealiable_bw, num_low_birthweight_births, num_live_births, 
+         perc_low_bw)
+
+dim(ch_df)
+#county health data captures only 3141 counties
+
+sum(duplicated(ch_df$fips))
+#no duplicate counties
+
+length(unique(ch_df$state_names))
+unique(ch_df$state_names)
+#51 states because it includes DC
 
 ```
 
