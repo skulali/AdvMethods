@@ -33,4 +33,216 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
-#Load and clean datasets
+# Load dataset
+```{r}
+eqi_lbw_clean_df <- read_csv("data/eqi_lbw_clean_df.csv")
+
+```
+
+# Explore counties
+```{r}
+dim(eqi_lbw_clean_df)
+#we have 2995 counties in total
+
+#how many counties do we have for each state?
+eqi_lbw_clean_df |> 
+  group_by(state_name) |> 
+  summarize(num_county = n()) |> 
+  ggplot(aes(x = state_name, y = num_county)) +
+  geom_col()
+#NEED TO CLEAN UP THIS GRAPH
+
+#which state has the most counties?
+eqi_lbw_clean_df |> 
+  group_by(state_name) |> 
+  summarize(num_county = n()) |> 
+  arrange(desc(num_county))
+#texas has the most counties described here; 235 counties
+
+#which state has the least counties?
+eqi_lbw_clean_df |> 
+  group_by(state_name) |> 
+  summarize(num_county = n()) |> 
+  arrange(num_county)
+#DC has the least counties described here; 1 county
+#next is DE with 3 counties described
+#there are no states with 0 counties described
+
+```
+
+# Distributions
+## num_low_birthweight_births
+```{r}
+sum(is.na(eqi_lbw_clean_df$num_low_birthweight_births))
+#removed NA values previously
+
+eqi_lbw_clean_df |> ggplot(aes(x = num_low_birthweight_births)) + 
+  geom_histogram() 
+
+#zoom in
+eqi_lbw_clean_df |> ggplot(aes(x = num_low_birthweight_births)) + 
+  geom_histogram() + 
+  scale_x_continuous(limits = c(0, 2000))  # Set x-axis range
+
+eqi_lbw_clean_df |> 
+  select(county_name, state_name, num_low_birthweight_births) |> 
+  arrange(desc(num_low_birthweight_births)) |> 
+  print(n=50)
+#Los Angeles County, California has highest num_low_birthweight_births = 71362
+
+eqi_lbw_clean_df |> 
+  select(county_name, state_name, num_low_birthweight_births) |> 
+  arrange(num_low_birthweight_births) |> 
+  print(n=50)
+#Sedgwick County, Colorado has lowest num_low_birthweight_births = 10
+
+#range is 10 to 71362 counts of low birthweight
+
+mean(eqi_lbw_clean_df$num_low_birthweight_births)
+median(eqi_lbw_clean_df$num_low_birthweight_births)
+IQR(eqi_lbw_clean_df$num_low_birthweight_births)
+#num_low_birthweight_births is incredibly right skewed
+
+```
+
+## num_live_births
+```{r}
+sum(is.na(eqi_lbw_clean_df$num_live_births))
+#removed NA values previously
+
+eqi_lbw_clean_df |> ggplot(aes(x = num_live_births)) + 
+  geom_histogram() 
+
+#zoom in
+eqi_lbw_clean_df |> ggplot(aes(x = num_live_births)) + 
+  geom_histogram() + 
+  scale_x_continuous(limits = c(0, 2000))  # Set x-axis range
+
+eqi_lbw_clean_df |> 
+  select(county_name, state_name, num_live_births) |> 
+  arrange(desc(num_live_births)) |> 
+  print(n=50)
+#Los Angeles County, California has highest num_live_births = 986350
+
+eqi_lbw_clean_df |> 
+  select(county_name, state_name, num_live_births) |> 
+  arrange(num_live_births) |> 
+  print(n=50)
+#Jackson County, Colorado has lowest num_live_births = 77
+
+#range is 77 to 986350 counts for num_live_births
+
+mean(eqi_lbw_clean_df$num_live_births, na.rm = TRUE)
+median(eqi_lbw_clean_df$num_live_births, na.rm = TRUE)
+IQR(eqi_lbw_clean_df$num_live_births, na.rm = TRUE)
+#live birth counts are incredibly right skewed
+
+```
+
+## EQI - higher is worse
+```{r}
+sum(is.na(eqi_lbw_clean_df$eqi))
+#no NAs
+
+eqi_lbw_clean_df |> ggplot(aes(x = eqi)) + geom_histogram()
+
+eqi_lbw_clean_df |> 
+  select(county_name, state_name, eqi) |> 
+  arrange(desc(eqi))
+
+eqi_lbw_clean_df |> 
+  select(county_name, state_name, eqi) |> 
+  arrange(eqi)
+
+```
+Eqi is mostly, normal. Slight left tail.
+
+## Sociod
+```{r}
+sum(is.na(eqi_lbw_clean_df$sociod))
+#no NAs
+
+eqi_lbw_clean_df |> ggplot(aes(x = sociod)) + geom_histogram()
+
+eqi_lbw_clean_df |> 
+  select(county_name, state_name, sociod) |> 
+  arrange(desc(sociod))
+
+eqi_lbw_clean_df |> 
+  select(county_name, state_name, sociod) |> 
+  arrange(sociod)
+
+```
+Sociod is Left skewed.
+
+## Air
+```{r}
+sum(is.na(eqi_lbw_clean_df$air))
+#no NAs
+
+eqi_lbw_clean_df |> ggplot(aes(x = air)) + geom_histogram()
+
+eqi_lbw_clean_df |> 
+  select(county_name, state_name, air) |> 
+  arrange(desc(sociod))
+
+eqi_lbw_clean_df |> 
+  select(county_name, state_name, air) |> 
+  arrange(sociod)
+
+```
+Air is normally distributed.
+
+## Water - distribution is bad
+```{r}
+sum(is.na(eqi_lbw_clean_df$water))
+#no NAs
+
+eqi_lbw_clean_df |> ggplot(aes(x = water)) + geom_histogram()
+
+eqi_lbw_clean_df |> 
+  select(county_name, state_name, water) |> 
+  arrange(desc(water))
+
+eqi_lbw_clean_df |> 
+  select(county_name, state_name, water) |> 
+  arrange(water)
+
+```
+Water is Bad.
+
+## Land
+```{r}
+sum(is.na(eqi_lbw_clean_df$land))
+#no NAs
+
+eqi_lbw_clean_df |> ggplot(aes(x = land)) + geom_histogram()
+
+eqi_lbw_clean_df |> 
+  select(county_name, state_name, land) |> 
+  arrange(desc(land))
+
+eqi_lbw_clean_df |> 
+  select(county_name, state_name, land) |> 
+  arrange(land)
+
+```
+Land is left skewed
+
+## Built
+```{r}
+sum(is.na(eqi_lbw_clean_df$built))
+#no NAs
+
+eqi_lbw_clean_df |> ggplot(aes(x = built)) + geom_histogram()
+
+eqi_lbw_clean_df |> 
+  select(county_name, state_name, built) |> 
+  arrange(desc(built))
+
+eqi_lbw_clean_df |> 
+  select(county_name, state_name, built) |> 
+  arrange(built)
+
+```
+Built is normally distributed.

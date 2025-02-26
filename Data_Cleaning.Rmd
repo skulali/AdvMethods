@@ -159,6 +159,7 @@ anti2 <- anti2 |> select(fips, everything())
 We have 3138 counties captured in both datasets.
 
 #Check for NA and unreliable lbw values
+#unreliable means value reported but considered unreliable since based on counts of twenty or less
 ```{r}
 sum(is.na(eqi_lbw_raw_df$num_low_birthweight_births))
 #99 counties are missing num_low_birthweight_births
@@ -208,9 +209,9 @@ Our cleaned dataset has 2995 counties
 
 #Write the combined dataset
 ```{r}
-write_csv(eqi_lbw_raw_df,"data/eqi_lbw_raw_df.csv")
+#write_csv(eqi_lbw_raw_df,"data/eqi_lbw_raw_df.csv")
 
-write_csv(eqi_lbw_clean_df,"data/eqi_lbw_clean_df.csv")
+#write_csv(eqi_lbw_clean_df,"data/eqi_lbw_clean_df.csv")
 
 ```
 raw dataset has unreliable low bw values and the NA low bw values while cleaned dataset does not
