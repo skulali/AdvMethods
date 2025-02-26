@@ -33,4 +33,176 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
-#Load and clean datasets; make sure counties and states match
+#Load dataset
+Clean dataset has unreliable low bw values and the NA low bw values removed
+```{r}
+eqi_lbw_clean_df <- read_csv("data/eqi_lbw_clean_df.csv")
+
+```
+
+#Prelim model just with EQI as exposure and low bw as outcome
+##Poisson model
+```{r}
+######Fit a Poisson model (not accounting for overdispersion)
+mod1_p = glm(num_low_birthweight_births ~ eqi, 
+          data=eqi_lbw_clean_df, 
+          family=poisson, 
+          offset=log_live_births)
+
+summary(mod1_p)
+
+sum(resid(mod1_p,type="pearson")^2)/mod1_p$df.residual
+#yes dispersion is potential problem bc scale > 1
+
+#goodness of fit
+pchisq(mod1_p$deviance, mod1_p$df.residual, lower.tail=F)
+#seeing a lack of fit for Poisson model
+
+#Pearson residual plot
+plot(resid(mod1_p,type="pearson"),ylab="Pearson residuals")
+#also potential issue with outliers
+
+```
+
+#Prelim model just with EQI as exposure and low bw as outcome
+##Quasipoisson model
+```{r}
+######Fit a Quasipoisson model (which acounts for overdispersion)
+#fit the Poisson model (accounting for overdispersion)
+#no offset bc exposure unit is already same here
+mod1_qp = glm(num_low_birthweight_births ~ eqi, 
+          data=eqi_lbw_clean_df, 
+          family=quasipoisson, 
+          offset=log_live_births)
+
+summary(mod1_qp)
+
+sum(resid(mod1_qp,type="pearson")^2)/mod1_qp$df.residual
+#yes dispersion 
+
+#goodness of fit
+pchisq(mod1_qp$deviance, mod1_qp$df.residual, lower.tail=F)
+#seeing a lack of fit with the quasipoisson
+
+#Pearson residual plot
+plot(resid(mod1_qp,type="pearson"),ylab="Pearson residuals")
+#also potential issue with outliers
+
+plot(mod1_qp)
+#looks perhaps nonlinear?
+
+```
+
+#Prelim model just with EQI as exposure and low bw as outcome
+##Penalized Spline
+```{r}
+mod1_qp_nl <- gam(num_low_birthweight_births ~ s(eqi),
+                  family = "quasipoisson",
+                  offset=log_live_births,
+                  data = eqi_lbw_clean_df)
+
+summary(mod1_qp_nl)
+
+#this is the penalty estimated by the model 
+mod1_qp_nl$sp
+
+plot(mod1_qp_nl)
+
+```
+Seeing nonlinear relationship between eqi and num_low_birthweight_births
+
+#Nonlinear checks of other indices and the low bw outcome; unadjusted
+```{r}
+##SOCIAL
+mod2_qp_nl <- gam(num_low_birthweight_births ~ s(sociod), 
+                  family = "quasipoisson",
+                  offset=log_live_births,
+                  data = eqi_lbw_clean_df)
+
+summary(mod2_qp_nl)
+plot(mod2_qp_nl)
+#nonlinear
+
+##AIR
+mod3_qp_nl <- gam(num_low_birthweight_births ~ s(air), 
+                  family = "quasipoisson",
+                  offset=log_live_births,
+                  data = eqi_lbw_clean_df)
+
+summary(mod3_qp_nl)
+plot(mod3_qp_nl)
+#nonlinear
+
+##BUILT
+mod4_qp_nl <- gam(num_low_birthweight_births ~ s(built), 
+                  family = "quasipoisson",
+                  offset=log_live_births,
+                  data = eqi_lbw_clean_df)
+
+summary(mod4_qp_nl)
+plot(mod4_qp_nl)
+#nonlinear
+
+##Water
+mod5_qp_nl <- gam(num_low_birthweight_births ~ s(water), 
+                  family = "quasipoisson",
+                  offset=log_live_births,
+                  data = eqi_lbw_clean_df)
+
+summary(mod5_qp_nl)
+plot(mod5_qp_nl)
+#nonlinear
+#water index was weird distribution; establish a cutoff?
+
+##Land
+mod6_qp_nl <- gam(num_low_birthweight_births ~ s(land), 
+                  family = "quasipoisson",
+                  offset=log_live_births,
+                  data = eqi_lbw_clean_df)
+
+summary(mod6_qp_nl)
+plot(mod6_qp_nl)
+#nonlinear
+
+```
+
+#Are there nonlinear relationships between the 5 subdomain indices?
+##penalized spline
+#using built index as the outcome for now
+```{r}
+##SOCIAL
+mod7_qp_nl <- gam(built ~ s(sociod),
+                  data = eqi_lbw_clean_df)
+
+summary(mod7_qp_nl)
+plot(mod7_qp_nl)
+#nonlinear
+
+##AIR
+mod8_qp_nl <- gam(built ~ s(air), 
+                  data = eqi_lbw_clean_df)
+
+summary(mod8_qp_nl)
+plot(mod8_qp_nl)
+#nonlinear
+
+##Water
+mod9_qp_nl <- gam(built ~ s(water), 
+                  data = eqi_lbw_clean_df)
+
+summary(mod9_qp_nl)
+plot(mod9_qp_nl)
+#nonlinear; again water has weird distribution; use cutoff?
+
+##Land
+mod10_qp_nl <- gam(built ~ s(land), 
+                  data = eqi_lbw_clean_df)
+
+summary(mod10_qp_nl)
+plot(mod10_qp_nl)
+#very nonlinear
+
+```
+
+```
+

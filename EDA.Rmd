@@ -11,6 +11,7 @@ library(readr)
 library(readxl)
 library(splines)
 library(mgcv)
+library(ggcorrplot)
 
 ```
 
@@ -34,6 +35,7 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 
 # Load dataset
+Clean dataset has unreliable low bw values and the NA low bw values removed
 ```{r}
 eqi_lbw_clean_df <- read_csv("data/eqi_lbw_clean_df.csv")
 
@@ -57,7 +59,7 @@ eqi_lbw_clean_df |>
   group_by(state_name) |> 
   summarize(num_county = n()) |> 
   arrange(desc(num_county))
-#texas has the most counties described here; 235 counties
+#Texas has the most counties described here; 235 counties
 
 #which state has the least counties?
 eqi_lbw_clean_df |> 
@@ -104,6 +106,7 @@ IQR(eqi_lbw_clean_df$num_low_birthweight_births)
 #num_low_birthweight_births is incredibly right skewed
 
 ```
+num_low_birthweight_births is incredibly right skewed
 
 ## num_live_births
 ```{r}
@@ -138,8 +141,9 @@ IQR(eqi_lbw_clean_df$num_live_births, na.rm = TRUE)
 #live birth counts are incredibly right skewed
 
 ```
+live birth counts are incredibly right skewed
 
-## EQI - higher is worse
+## EQI - higher means worse environment
 ```{r}
 sum(is.na(eqi_lbw_clean_df$eqi))
 #no NAs
@@ -209,7 +213,7 @@ eqi_lbw_clean_df |>
   arrange(water)
 
 ```
-Water is Bad.
+Water is Bad. Use a cutoff?
 
 ## Land
 ```{r}
@@ -246,3 +250,49 @@ eqi_lbw_clean_df |>
 
 ```
 Built is normally distributed.
+
+# Quick Look at Correlations (using Spearman)
+```{r}
+
+cor_var <- eqi_lbw_clean_df |> 
+  select(eqi, water, 
+         built, air,
+         land, sociod,
+         num_low_birthweight_births,
+         num_live_births) |> 
+  na.omit()
+
+##Spearman correlations
+corr <- round(cor(cor_var, method = "spearman"), 2)
+
+#calculate p-values for spearman correlations
+p_mat <- cor_pmat(cor_var)
+
+#simple plot
+ggcorrplot(corr)
+
+#hiearchial clustering
+ggcorrplot(corr, hc.order = TRUE, outline.color = "white")
+
+#lower triangle
+ggcorrplot(corr,
+           hc.order = TRUE,
+           type = "lower",
+           outline.color = "white")
+
+#add correlation values onto plot
+ggcorrplot(corr,
+           hc.order = TRUE,
+           type = "lower",
+           lab = TRUE)
+
+#add correlation significance level
+#X marks the not signif correlations (Barring the no significant coefficient)
+ggcorrplot(corr,
+           hc.order = TRUE,
+           type = "lower",
+           p.mat = p_mat)
+
+```
+
+
