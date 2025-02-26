@@ -87,6 +87,13 @@ length(unique(eqi_df$state_abbr))
 unique(eqi_df$state_abbr)
 #51 states because it includes DC
 
+sum(is.na(eqi_df$eqi))
+sum(is.na(eqi_df$air))
+sum(is.na(eqi_df$water))
+sum(is.na(eqi_df$land))
+sum(is.na(eqi_df$sociod))
+#no NA values for our main predictors
+
 
 ```
 
@@ -96,15 +103,18 @@ unique(eqi_df$state_abbr)
 ch_raw <- read_xlsx(path = "data/2015 County Health Rankings Data.xlsx", sheet = 4, 
                    skip =1, range = "A2:FE3143")
 
+colnames(ch_raw)
+
 ch_df <- ch_raw |> 
-  rename(state_names = "State",
+  rename(state_name = "State",
+         county_abbr = "County",
          unrealiable_bw = "Unreliable",
          num_low_birthweight_births = "# Low Birthweight Births",
          num_live_births = "# Live births",
          perc_low_bw = "% LBW",
          fips = "FIPS") |> 
-  select(fips, state_names, unrealiable_bw, num_low_birthweight_births, num_live_births, 
-         perc_low_bw)
+  select(fips, state_name, county_abbr, unrealiable_bw, num_low_birthweight_births, 
+         num_live_births, perc_low_bw)
 
 dim(ch_df)
 #county health data captures only 3141 counties
@@ -112,9 +122,95 @@ dim(ch_df)
 sum(duplicated(ch_df$fips))
 #no duplicate counties
 
-length(unique(ch_df$state_names))
-unique(ch_df$state_names)
+length(unique(ch_df$state_name))
+unique(ch_df$state_name)
 #51 states because it includes DC
 
 ```
 
+#Create combined dataset
+```{r}
+#combine datasets
+eqi_lbw_raw_df <- inner_join(eqi_df, ch_df, by = "fips")
+
+#create offset of log_live_births
+#reorder columns
+eqi_lbw_raw_df <- eqi_lbw_raw_df |> 
+  mutate(log_live_births = log(num_live_births)) |> 
+  select(fips, state_name, state_abbr, county_name, county_abbr, 
+         unrealiable_bw, num_low_birthweight_births, num_live_births, 
+         log_live_births, perc_low_bw, everything())
+
+dim(eqi_lbw_raw_df)
+#when joining datasets together get only 3138 counties
+
+#which counties are missing?
+#anti_join returns all rows from x without a match in y
+anti <- anti_join(eqi_df, ch_df, by = "fips")
+anti <- anti |> select(fips, everything())
+#5 counties in Alaska are in eqi_df but not ch_df
+
+#anti_join returns all rows from x without a match in y
+anti2 <- anti_join(ch_df, eqi_df, by = "fips")
+anti2 <- anti2 |> select(fips, everything())
+#3 counties in Alaska are in ch_df but not eqi_df
+
+```
+We have 3138 counties captured in both datasets.
+
+#Check for NA and unreliable lbw values
+```{r}
+sum(is.na(eqi_lbw_raw_df$num_low_birthweight_births))
+#99 counties are missing num_low_birthweight_births
+
+#which states have most missing num_low_birthweight_births?
+eqi_lbw_raw_df |> 
+  filter(is.na(num_low_birthweight_births)) |> 
+  group_by(state_name) |> 
+  summarize(num_county_na = n()) |> 
+  arrange(desc(num_county_na))
+#Nebraska has the most missing low bw values
+
+sum(is.na(eqi_lbw_raw_df$num_live_births))
+#99 counties are missing num_live_births
+
+table(eqi_lbw_raw_df$unrealiable_bw)
+#the x marks the counties with unreliable birth weight data
+#44 counties have unreliable low birthweight data
+
+#which states have most number of unreliable num_low_birthweight_births?
+eqi_lbw_raw_df |> 
+  filter(unrealiable_bw %in% c("x")) |> 
+  group_by(state_name) |> 
+  summarize(num_county_na = n()) |> 
+  arrange(desc(num_county_na))
+#Kansas has the most missing unreliable values
+
+```
+
+#Create cleaned dataset with unreliable and and NA values removed for low bw
+```{r}
+eqi_lbw_clean_df <- eqi_lbw_raw_df |> filter(! unrealiable_bw %in% c("x"))
+
+eqi_lbw_clean_df <- eqi_lbw_clean_df |> 
+  filter(! is.na(num_low_birthweight_births)) 
+
+dim(eqi_lbw_clean_df)
+#Our cleaned dataset has 2995 counties
+
+sum(is.na(eqi_lbw_clean_df$num_low_birthweight_births))
+sum(is.na(eqi_lbw_clean_df$num_live_births))
+sum(is.na(eqi_lbw_clean_df$log_live_births))
+#checked and have no NA values for these variables
+
+```
+Our cleaned dataset has 2995 counties
+
+#Write the combined dataset
+```{r}
+write_csv(eqi_lbw_raw_df,"data/eqi_lbw_raw_df.csv")
+
+write_csv(eqi_lbw_clean_df,"data/eqi_lbw_clean_df.csv")
+
+```
+raw dataset has unreliable low bw values and the NA low bw values while cleaned dataset does not
