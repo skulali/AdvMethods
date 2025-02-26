@@ -9,6 +9,7 @@ date: 2025-02-26
 library(tidyverse)
 library(readr)
 library(readxl)
+library(janitor)
 
 ```
 
@@ -31,4 +32,60 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
-#Load and clean datasets
+#Load and Clean EQI Data
+```{r}
+#Load EQI data
+eqi_raw <- read_csv("data/2006_2010_EQI_2Jan2018_VC.csv") |> 
+  clean_names(case = "snake")
+
+head(eqi_raw)
+colnames(eqi_raw)
+
+#Add leading zeros to the stFIPS; code taken from the provided EQI README file 
+eqi_raw$stfips <- substr(as.numeric(eqi_raw$stfips) + 100000, 2,7)
+eqi_raw$stfips
+
+#Rename variables
+eqi_df =
+  eqi_raw |> 
+  rename(
+    fips = stfips,
+    state_abbr = state,
+    air = air_eqi_2jan2018_vc,
+    air_4q = air_eqi_2jan2018_vc_4,
+    air_3q = air_eqi_2jan2018_vc_3,
+    air_5q = air_eqi_2jan2018_vc_5,
+    water = water_eqi_2jan2018_vc,
+    water_4q = water_eqi_2jan2018_vc_4,
+    water_3q = water_eqi_2jan2018_vc_3,
+    water_5q = water_eqi_2jan2018_vc_5,
+    land = land_eqi_2jan2018_vc,
+    land_4q = land_eqi_2jan2018_vc_4,
+    land_3q = land_eqi_2jan2018_vc_3,
+    land_5q = land_eqi_2jan2018_vc_5,
+    sociod = sociod_eqi_2jan2018_vc,
+    sociod_4q = sociod_eqi_2jan2018_vc_4,
+    sociod_3q = sociod_eqi_2jan2018_vc_3,
+    sociod_5q = sociod_eqi_2jan2018_vc_5,
+    built = built_eqi_2jan2018_vc,
+    built_4q = built_eqi_2jan2018_vc_4,
+    built_3q = built_eqi_2jan2018_vc_3,
+    built_5q = built_eqi_2jan2018_vc_5,
+    eqi = eqi_2jan2018_vc,
+    eqi_4q = eqi_2jan2018_vc_4,
+    eqi_3q = eqi_2jan2018_vc_3,
+    eqi_5q = eqi_2jan2018_vc_5 
+  )
+
+dim(eqi_df)
+#3143 counties are captured in the eqi_df
+
+sum(duplicated(eqi_df$fips))
+#no duplicate counties in the eqi_df
+
+length(unique(eqi_df$state_abbr))
+#51 states because it includes Washington, DC
+
+
+```
+
