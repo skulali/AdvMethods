@@ -12,7 +12,7 @@ library(readxl)
 library(janitor)
 library(tidycensus)
 
- numberT)
+# census_api_key("#", install = T, overwrite = T)
 ```
 
 # Template
