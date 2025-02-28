@@ -10,7 +10,9 @@ library(tidyverse)
 library(readr)
 library(readxl)
 library(janitor)
+library(tidycensus)
 
+ numberT)
 ```
 
 # Template
@@ -47,34 +49,130 @@ eqi_raw$stfips
 
 #Rename variables
 eqi_df =
-  eqi_raw |> 
+  eqi_raw |>
   rename(
     fips = stfips,
     state_abbr = state,
     air = air_eqi_2jan2018_vc,
+    air_rucc1 = rucc1_air_eqi_2jan2018_vc,
+    air_rucc2 = rucc2_air_eqi_2jan2018_vc,
+    air_rucc3 = rucc3_air_eqi_2jan2018_vc,
+    air_rucc4 = rucc4_air_eqi_2jan2018_vc,
     air_4q = air_eqi_2jan2018_vc_4,
+    air_4q_rucc1 = rucc1_air_eqi_2jan2018_vc_4,
+    air_4q_rucc2 = rucc2_air_eqi_2jan2018_vc_4,
+    air_4q_rucc3 = rucc3_air_eqi_2jan2018_vc_4,
+    air_4q_rucc4 = rucc4_air_eqi_2jan2018_vc_4,
     air_3q = air_eqi_2jan2018_vc_3,
+    air_3q_rucc1 = rucc1_air_eqi_2jan2018_vc_3,
+    air_3q_rucc2 = rucc2_air_eqi_2jan2018_vc_3,
+    air_3q_rucc3 = rucc3_air_eqi_2jan2018_vc_3,
+    air_3q_rucc4 = rucc4_air_eqi_2jan2018_vc_3,
     air_5q = air_eqi_2jan2018_vc_5,
+    air_5q_rucc1 = rucc1_air_eqi_2jan2018_vc_5,
+    air_5q_rucc2 = rucc2_air_eqi_2jan2018_vc_5,
+    air_5q_rucc3 = rucc3_air_eqi_2jan2018_vc_5,
+    air_5q_rucc4 = rucc4_air_eqi_2jan2018_vc_5,
     water = water_eqi_2jan2018_vc,
+    water_rucc1 = rucc1_water_eqi_2jan2018_vc,
+    water_rucc2 = rucc2_water_eqi_2jan2018_vc,
+    water_rucc3 = rucc3_water_eqi_2jan2018_vc,
+    water_rucc4 = rucc4_water_eqi_2jan2018_vc,
     water_4q = water_eqi_2jan2018_vc_4,
+    water_4q_rucc1 = rucc1_water_eqi_2jan2018_vc_4,
+    water_4q_rucc2 = rucc2_water_eqi_2jan2018_vc_4,
+    water_4q_rucc3 = rucc3_water_eqi_2jan2018_vc_4,
+    water_4q_rucc4 = rucc4_water_eqi_2jan2018_vc_4,
     water_3q = water_eqi_2jan2018_vc_3,
+    water_3q_rucc1 = rucc1_water_eqi_2jan2018_vc_3,
+    water_3q_rucc2 = rucc2_water_eqi_2jan2018_vc_3,
+    water_3q_rucc3 = rucc3_water_eqi_2jan2018_vc_3,
+    water_3q_rucc4 = rucc4_water_eqi_2jan2018_vc_3,
     water_5q = water_eqi_2jan2018_vc_5,
+    water_5q_rucc1 = rucc1_water_eqi_2jan2018_vc_5,
+    water_5q_rucc2 = rucc2_water_eqi_2jan2018_vc_5,
+    water_5q_rucc3 = rucc3_water_eqi_2jan2018_vc_5,
+    water_5q_rucc4 = rucc4_water_eqi_2jan2018_vc_5,
     land = land_eqi_2jan2018_vc,
+    land_rucc1 = rucc1_land_eqi_2jan2018_vc,
+    land_rucc2 = rucc2_land_eqi_2jan2018_vc,
+    land_rucc3 = rucc3_land_eqi_2jan2018_vc,
+    land_rucc4 = rucc4_land_eqi_2jan2018_vc,
     land_4q = land_eqi_2jan2018_vc_4,
+    land_4q_rucc1 = rucc1_land_eqi_2jan2018_vc_4,
+    land_4q_rucc2 = rucc2_land_eqi_2jan2018_vc_4,
+    land_4q_rucc3 = rucc3_land_eqi_2jan2018_vc_4,
+    land_4q_rucc4 = rucc4_land_eqi_2jan2018_vc_4,
     land_3q = land_eqi_2jan2018_vc_3,
+    land_3q_rucc1 = rucc1_land_eqi_2jan2018_vc_3,
+    land_3q_rucc2 = rucc2_land_eqi_2jan2018_vc_3,
+    land_3q_rucc3 = rucc3_land_eqi_2jan2018_vc_3,
+    land_3q_rucc4 = rucc4_land_eqi_2jan2018_vc_3,
     land_5q = land_eqi_2jan2018_vc_5,
+    land_5q_rucc1 = rucc1_land_eqi_2jan2018_vc_5,
+    land_5q_rucc2 = rucc2_land_eqi_2jan2018_vc_5,
+    land_5q_rucc3 = rucc3_land_eqi_2jan2018_vc_5,
+    land_5q_rucc4 = rucc4_land_eqi_2jan2018_vc_5,
     sociod = sociod_eqi_2jan2018_vc,
+    sociod_rucc1 = rucc1_sociod_eqi_2jan2018_vc,
+    sociod_rucc2 = rucc2_sociod_eqi_2jan2018_vc,
+    sociod_rucc3 = rucc3_sociod_eqi_2jan2018_vc,
+    sociod_rucc4 = rucc4_sociod_eqi_2jan2018_vc,
     sociod_4q = sociod_eqi_2jan2018_vc_4,
+    sociod_4q_rucc1 = rucc1_sociod_eqi_2jan2018_vc_4,
+    sociod_4q_rucc2 = rucc2_sociod_eqi_2jan2018_vc_4,
+    sociod_4q_rucc3 = rucc3_sociod_eqi_2jan2018_vc_4,
+    sociod_4q_rucc4 = rucc4_sociod_eqi_2jan2018_vc_4,
     sociod_3q = sociod_eqi_2jan2018_vc_3,
+    sociod_3q_rucc1 = rucc1_sociod_eqi_2jan2018_vc_3,
+    sociod_3q_rucc2 = rucc2_sociod_eqi_2jan2018_vc_3,
+    sociod_3q_rucc3 = rucc3_sociod_eqi_2jan2018_vc_3,
+    sociod_3q_rucc4 = rucc4_sociod_eqi_2jan2018_vc_3,
     sociod_5q = sociod_eqi_2jan2018_vc_5,
+    sociod_5q_rucc1 = rucc1_sociod_eqi_2jan2018_vc_5,
+    sociod_5q_rucc2 = rucc2_sociod_eqi_2jan2018_vc_5,
+    sociod_5q_rucc3 = rucc3_sociod_eqi_2jan2018_vc_5,
+    sociod_5q_rucc4 = rucc4_sociod_eqi_2jan2018_vc_5,
     built = built_eqi_2jan2018_vc,
+    built_rucc1 = rucc1_built_eqi_2jan2018_vc,
+    built_rucc2 = rucc2_built_eqi_2jan2018_vc,
+    built_rucc3 = rucc3_built_eqi_2jan2018_vc,
+    built_rucc4 = rucc4_built_eqi_2jan2018_vc,
     built_4q = built_eqi_2jan2018_vc_4,
+    built_4q_rucc1 = rucc1_built_eqi_2jan2018_vc_4,
+    built_4q_rucc2 = rucc2_built_eqi_2jan2018_vc_4,
+    built_4q_rucc3 = rucc3_built_eqi_2jan2018_vc_4,
+    built_4q_rucc4 = rucc4_built_eqi_2jan2018_vc_4,
     built_3q = built_eqi_2jan2018_vc_3,
+    built_3q_rucc1 = rucc1_built_eqi_2jan2018_vc_3,
+    built_3q_rucc2 = rucc2_built_eqi_2jan2018_vc_3,
+    built_3q_rucc3 = rucc3_built_eqi_2jan2018_vc_3,
+    built_3q_rucc4 = rucc4_built_eqi_2jan2018_vc_3,
     built_5q = built_eqi_2jan2018_vc_5,
+    built_5q_rucc1 = rucc1_built_eqi_2jan2018_vc_5,
+    built_5q_rucc2 = rucc2_built_eqi_2jan2018_vc_5,
+    built_5q_rucc3 = rucc3_built_eqi_2jan2018_vc_5,
+    built_5q_rucc4 = rucc4_built_eqi_2jan2018_vc_5,
     eqi = eqi_2jan2018_vc,
+    eqi_rucc1 = rucc1_eqi_2jan2018_vc,
+    eqi_rucc2 = rucc2_eqi_2jan2018_vc,
+    eqi_rucc3 = rucc3_eqi_2jan2018_vc,
+    eqi_rucc4 = rucc4_eqi_2jan2018_vc,
     eqi_4q = eqi_2jan2018_vc_4,
+    eqi_4q_rucc1 = rucc1_eqi_2jan2018_vc_4,
+    eqi_4q_rucc2 = rucc2_eqi_2jan2018_vc_4,
+    eqi_4q_rucc3 = rucc3_eqi_2jan2018_vc_4,
+    eqi_4q_rucc4 = rucc4_eqi_2jan2018_vc_4,
     eqi_3q = eqi_2jan2018_vc_3,
-    eqi_5q = eqi_2jan2018_vc_5 
+    eqi_3q_rucc1 = rucc1_eqi_2jan2018_vc_3,
+    eqi_3q_rucc2 = rucc2_eqi_2jan2018_vc_3,
+    eqi_3q_rucc3 = rucc3_eqi_2jan2018_vc_3,
+    eqi_3q_rucc4 = rucc4_eqi_2jan2018_vc_3,
+    eqi_5q = eqi_2jan2018_vc_5,
+    eqi_5q_rucc1 = rucc1_eqi_2jan2018_vc_5,
+    eqi_5q_rucc2 = rucc2_eqi_2jan2018_vc_5,
+    eqi_5q_rucc3 = rucc3_eqi_2jan2018_vc_5,
+    eqi_5q_rucc4 = rucc4_eqi_2jan2018_vc_5
   )
 
 dim(eqi_df)
@@ -93,8 +191,6 @@ sum(is.na(eqi_df$water))
 sum(is.na(eqi_df$land))
 sum(is.na(eqi_df$sociod))
 #no NA values for our main predictors
-
-
 ```
 
 #Load and Clean County Health Data
@@ -106,15 +202,35 @@ ch_raw <- read_xlsx(path = "data/2015 County Health Rankings Data.xlsx", sheet =
 colnames(ch_raw)
 
 ch_df <- ch_raw |> 
-  rename(state_name = "State",
+  rename(fips = "FIPS",
+         state_name = "State",
          county_abbr = "County",
          unrealiable_bw = "Unreliable",
          num_low_birthweight_births = "# Low Birthweight Births",
          num_live_births = "# Live births",
          perc_low_bw = "% LBW",
-         fips = "FIPS") |> 
+         perc_smokers = "% Smokers") |> 
   select(fips, state_name, county_abbr, unrealiable_bw, num_low_birthweight_births, 
-         num_live_births, perc_low_bw)
+         num_live_births, perc_low_bw, perc_smokers)
+
+ch_raw2 =
+  read_xlsx("data/2015 County Health Rankings Data.xlsx", sheet = 6, skip = 1, range = "A2:CB3143")
+
+ch_df2 <- ch_raw2 |> 
+  rename(fips = "FIPS",
+         state_name = "State",
+         county_abbr = "County",
+         perc_black = "% African American",
+         perc_AIAN = "% American Indian/ Alaskan Native",
+         perc_asian = "% Asian",
+         perc_islander = "% Native Hawaiian/ Other Pacific Islander",
+         perc_hisp = "% Hispanic",
+         perc_white = "% Non-Hispanic white",
+         perc_rural = "% Rural") |> 
+  select(fips, state_name, county_abbr, perc_black, perc_AIAN, perc_asian, perc_islander, perc_hisp, perc_white, perc_rural)
+
+ch_df =
+  left_join(ch_df, ch_df2)
 
 dim(ch_df)
 #county health data captures only 3141 counties
@@ -125,8 +241,53 @@ sum(duplicated(ch_df$fips))
 length(unique(ch_df$state_name))
 unique(ch_df$state_name)
 #51 states because it includes DC
-
 ```
+
+# Loading and cleaning census data for age
+```{r}
+# importing variable list and selecting variables of interest from census
+
+variables = load_variables(2013, "acs5")
+
+age_data = get_acs(
+  year = 2013,
+  geography = "county",
+  variables = c("B01001_026", "B01001_031", "B01001_032",
+                "B01001_033", "B01001_034", "B01001_035",
+                "B01001_036", "B01001_037", "B01001_038",
+                "B01001_039"),
+         geometry = TRUE,
+         survey = "acs5",
+         output = "wide") |>
+  rename(total_age = B01001_026E,
+         t1819 = B01001_031E,
+         t20 = B01001_032E,
+         t21 = B01001_033E,
+         t2224 = B01001_034E,
+         t2529 = B01001_035E,
+         t3034 = B01001_036E,
+         t3539 = B01001_037E,
+         t4044 = B01001_038E,
+         t4549 = B01001_039E) |> 
+  mutate(age_18_49 = t1819+t20+t21+t2224+t2529+t3034+t3539+t4044+t4549,
+         age_18_24 = t1819+t20+t21+t2224,
+         age_25_34 = t2529+t3034,
+         age_35_44 = t3539+t4044,
+         age_45_49 = t4549) |> 
+  mutate(perc_age1849 = 100*(age_18_49/total_age),
+         perc_age1824 = 100*(age_18_24/total_age),
+         perc_age2534 = 100*(age_25_34/total_age),
+         perc_age3544 = 100*(age_35_44/total_age),
+         perc_age4549 = 100*(age_45_49/total_age)) |> 
+  janitor::clean_names() |> 
+  select(name, geoid, perc_age1849, perc_age1824, perc_age2534, perc_age3544, perc_age4549) |> 
+  rename(fips = geoid)
+
+ch_df =
+  left_join(ch_df, age_data) |> 
+  select(-name)
+```
+
 
 #Create combined dataset
 ```{r}
@@ -194,7 +355,8 @@ eqi_lbw_raw_df |>
 eqi_lbw_clean_df <- eqi_lbw_raw_df |> filter(! unrealiable_bw %in% c("x"))
 
 eqi_lbw_clean_df <- eqi_lbw_clean_df |> 
-  filter(! is.na(num_low_birthweight_births)) 
+  filter(! is.na(num_low_birthweight_births)) |> 
+  select(-unrealiable_bw)
 
 dim(eqi_lbw_clean_df)
 #Our cleaned dataset has 2995 counties
