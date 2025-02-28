@@ -12,7 +12,8 @@ library(readxl)
 library(splines)
 library(mgcv)
 library(ggcorrplot)
-
+library(table1)
+library(xlsx)
 ```
 
 # Template
@@ -295,4 +296,173 @@ ggcorrplot(corr,
 
 ```
 
+# Sumamry Tables
 
+```{r, message = F}
+# creating a separate dataset for the summary tables with clearer names and formatting
+
+tbl_data =
+  eqi_lbw_clean_df |> 
+  mutate(`Environmental Quality Index` = eqi,
+          eqi_cat =  cut(eqi, 
+                  breaks = quantile(eqi, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE),
+                  labels = c("Excellent", "Good", "Fair", "Poor"),
+                  include.lowest = TRUE),
+         `Air Domain Index` = air,
+          air_cat =  cut(air, 
+                  breaks = quantile(air, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE),
+                  labels = c("Excellent", "Good", "Fair", "Poor"),
+                  include.lowest = TRUE),
+         `Water Domain Index` = water,
+          water_cat =  cut(water, 
+                  breaks = quantile(water, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE),
+                  labels = c("Excellent", "Good", "Fair", "Poor"),
+                  include.lowest = TRUE),
+         `Land Domain Index` = land,
+          land_cat =  cut(land, 
+                  breaks = quantile(land, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE),
+                  labels = c("Excellent", "Good", "Fair", "Poor"),
+                  include.lowest = TRUE),
+         `Built-Environment Domain Index` = built,
+          built_cat =  cut(built, 
+                  breaks = quantile(built, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE),
+                  labels = c("Excellent", "Good", "Fair", "Poor"),
+                  include.lowest = TRUE),
+         `Sociodemographic Domain Index` = sociod,
+          sociod_cat =  cut(sociod, 
+                  breaks = quantile(sociod, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE),
+                  labels = c("Excellent", "Good", "Fair", "Poor"),
+                  include.lowest = TRUE),
+         `Rural-Urban Continuum Codes` = case_when(cat_rucc == 1 ~ "Metropolitan-Urbanized",
+                                                   cat_rucc == 2 ~ "Nonmetropolitan-Urbanized ",
+                                                   cat_rucc == 3 ~ "Less Urbanized",
+                                                   cat_rucc == 4 ~ "Thinly Populated"),
+         `Live Births (#)` = num_live_births,
+         `Low Birth Weight (#)` = num_low_birthweight_births,
+         `Low Birth Weight (%)` = perc_low_bw,
+         `Non-Hispanic White (%)` = perc_white,
+         `African-American (%)` = perc_black,
+         `Asian (%)` = perc_asian,
+         `American Indian / Alaskan Native (%)` = perc_AIAN,
+         `Native Hawaiian / Other Pacific Islander (%)` = perc_islander,
+         `Hispanic (%)` = perc_hisp,
+         `18-49 years old (%)` = perc_age1849, 
+         `18-24 years old (%)` = perc_age1824, 
+         `25-34 years old (%)` = perc_age2534, 
+         `35-44 years old (%)` = perc_age3544, 
+         `45-49 years old (%)` = perc_age4549,
+         `Rural (%)` = perc_rural,
+         `Smokers (%)` = perc_smokers)
+```
+
+## Table 1
+
+```{r, message = F, warning = F}
+# creating a table 1 - overall
+
+table1 =
+  table1::table1(~ `Environmental Quality Index` + `Air Domain Index` + `Water Domain Index` + `Land Domain Index` + `Built-Environment Domain Index` + `Sociodemographic Domain Index` + `Rural-Urban Continuum Codes` + `Live Births (#)` + `Low Birth Weight (#)` + `Low Birth Weight (%)` + `Non-Hispanic White (%)` + `African-American (%)` + `Asian (%)` + `American Indian / Alaskan Native (%)` + `Native Hawaiian / Other Pacific Islander (%)` + `Hispanic (%)` + `18-49 years old (%)` + `18-24 years old (%)` + `25-34 years old (%)` + `35-44 years old (%)` + `45-49 years old (%)` + `Rural (%)` + `Smokers (%)`, data = tbl_data)
+
+table1
+
+table1_df = data.frame(table1)
+```
+
+## Table 2
+
+```{r, message = F, warning = F}
+# creating a table 2 based on the overall EQI
+
+table2_eqi = 
+  table1(~ `Environmental Quality Index` + `Air Domain Index` + `Water Domain Index` + `Land Domain Index` + `Built-Environment Domain Index` + `Sociodemographic Domain Index` + `Rural-Urban Continuum Codes` + `Live Births (#)` + `Low Birth Weight (#)` + `Low Birth Weight (%)` + `Non-Hispanic White (%)` + `African-American (%)` + `Asian (%)` + `American Indian / Alaskan Native (%)` + `Native Hawaiian / Other Pacific Islander (%)` + `Hispanic (%)` + `18-49 years old (%)` + `18-24 years old (%)` + `25-34 years old (%)` + `35-44 years old (%)` + `45-49 years old (%)` + `Rural (%)` + `Smokers (%)` | eqi_cat, data = tbl_data)
+
+table2_eqi
+
+table2_eqi = data.frame(table2_eqi)
+```
+
+
+```{r, message = F, warning = F}
+# creating a table 2 based on the air index
+
+table2_air = 
+  table1(~ `Environmental Quality Index` + `Air Domain Index` + `Water Domain Index` + `Land Domain Index` + `Built-Environment Domain Index` + `Sociodemographic Domain Index` + `Rural-Urban Continuum Codes` + `Live Births (#)` + `Low Birth Weight (#)` + `Low Birth Weight (%)` + `Non-Hispanic White (%)` + `African-American (%)` + `Asian (%)` + `American Indian / Alaskan Native (%)` + `Native Hawaiian / Other Pacific Islander (%)` + `Hispanic (%)` + `18-49 years old (%)` + `18-24 years old (%)` + `25-34 years old (%)` + `35-44 years old (%)` + `45-49 years old (%)` + `Rural (%)` + `Smokers (%)` | air_cat, data = tbl_data)
+
+table2_air
+
+table2_air = data.frame(table2_air)
+```
+
+```{r, message = F, warning = F}
+# creating a table 2 based on the water index
+
+table2_water = 
+  table1(~ `Environmental Quality Index` + `Air Domain Index` + `Water Domain Index` + `Land Domain Index` + `Built-Environment Domain Index` + `Sociodemographic Domain Index` + `Rural-Urban Continuum Codes` + `Live Births (#)` + `Low Birth Weight (#)` + `Low Birth Weight (%)` + `Non-Hispanic White (%)` + `African-American (%)` + `Asian (%)` + `American Indian / Alaskan Native (%)` + `Native Hawaiian / Other Pacific Islander (%)` + `Hispanic (%)` + `18-49 years old (%)` + `18-24 years old (%)` + `25-34 years old (%)` + `35-44 years old (%)` + `45-49 years old (%)` + `Rural (%)` + `Smokers (%)` | water_cat, data = tbl_data)
+
+table2_water
+
+table2_water = data.frame(table2_water)
+```
+
+```{r, message = F, warning = F}
+# creating a table 2 based on the land index
+
+table2_land = 
+  table1(~ `Environmental Quality Index` + `Air Domain Index` + `Water Domain Index` + `Land Domain Index` + `Built-Environment Domain Index` + `Sociodemographic Domain Index` + `Rural-Urban Continuum Codes` + `Live Births (#)` + `Low Birth Weight (#)` + `Low Birth Weight (%)` + `Non-Hispanic White (%)` + `African-American (%)` + `Asian (%)` + `American Indian / Alaskan Native (%)` + `Native Hawaiian / Other Pacific Islander (%)` + `Hispanic (%)` + `18-49 years old (%)` + `18-24 years old (%)` + `25-34 years old (%)` + `35-44 years old (%)` + `45-49 years old (%)` + `Rural (%)` + `Smokers (%)` | land_cat, data = tbl_data)
+
+table2_land
+
+table2_land = data.frame(table2_land)
+```
+
+```{r, message = F, warning = F}
+# creating a table 2 based on the built index
+
+table2_built = 
+  table1(~ `Environmental Quality Index` + `Air Domain Index` + `Water Domain Index` + `Land Domain Index` + `Built-Environment Domain Index` + `Sociodemographic Domain Index` + `Rural-Urban Continuum Codes` + `Live Births (#)` + `Low Birth Weight (#)` + `Low Birth Weight (%)` + `Non-Hispanic White (%)` + `African-American (%)` + `Asian (%)` + `American Indian / Alaskan Native (%)` + `Native Hawaiian / Other Pacific Islander (%)` + `Hispanic (%)` + `18-49 years old (%)` + `18-24 years old (%)` + `25-34 years old (%)` + `35-44 years old (%)` + `45-49 years old (%)` + `Rural (%)` + `Smokers (%)` | built_cat, data = tbl_data)
+
+table2_built
+
+table2_built = data.frame(table2_built)
+```
+
+
+```{r, message = F, warning = F}
+# creating a table 2 based in the sociodemographic index
+
+table2_sociod = 
+  table1(~ `Environmental Quality Index` + `Air Domain Index` + `Water Domain Index` + `Land Domain Index` + `Built-Environment Domain Index` + `Sociodemographic Domain Index` + `Rural-Urban Continuum Codes` + `Live Births (#)` + `Low Birth Weight (#)` + `Low Birth Weight (%)` + `Non-Hispanic White (%)` + `African-American (%)` + `Asian (%)` + `American Indian / Alaskan Native (%)` + `Native Hawaiian / Other Pacific Islander (%)` + `Hispanic (%)` + `18-49 years old (%)` + `18-24 years old (%)` + `25-34 years old (%)` + `35-44 years old (%)` + `45-49 years old (%)` + `Rural (%)` + `Smokers (%)` | sociod_cat, data = tbl_data)
+
+table2_sociod
+
+table2_sociod = data.frame(table2_sociod)
+```
+
+```{r, eval = F}
+# exporting the tables into one excel sheet
+
+wb = createWorkbook()
+
+sheet = createSheet(wb, "overall")
+xlsx::addDataFrame(table1, sheet=sheet, startColumn=1, row.names=FALSE)
+
+sheet = createSheet(wb, "eqi")
+xlsx::addDataFrame(table2_eqi, sheet=sheet, startColumn=1, row.names=FALSE)
+
+sheet = xlsx::createSheet(wb, "air")
+xlsx::addDataFrame(table2_air, sheet=sheet, startColumn=1, row.names=FALSE)
+
+sheet = xlsx::createSheet (wb, "water")
+xlsx::addDataFrame(table2_water, sheet=sheet, startColumn=1, row.names=FALSE)
+
+sheet = xlsx::createSheet (wb, "land")
+xlsx:: addDataFrame(table2_land, sheet=sheet, startColumn=1, row.names=FALSE)
+
+sheet = xlsx::createSheet (wb, "built")
+xlsx:: addDataFrame(table2_built, sheet=sheet, startColumn=1, row.names=FALSE)
+
+sheet = xlsx::createSheet (wb, "sociod")
+xlsx:: addDataFrame(table2_sociod, sheet=sheet, startColumn=1, row.names=FALSE)
+
+xlsx::saveWorkbook (wb=wb,"data/summary_tables.xlsx")
+```
