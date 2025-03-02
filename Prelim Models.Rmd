@@ -1,6 +1,6 @@
 ---
 title: "Prelim Models"
-output: html_document
+output: pdf_document
 date: 2025-02-26
 ---
 
