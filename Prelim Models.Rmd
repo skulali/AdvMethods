@@ -5,13 +5,12 @@ date: 2025-02-26
 ---
 
 # Load packages
-```{r}
+```{r, warning = F, message = F}
 library(tidyverse)
 library(readr)
 library(readxl)
 library(splines)
 library(mgcv)
-
 ```
 
 # Template
@@ -35,7 +34,7 @@ scale_fill_discrete = scale_fill_viridis_d
 
 #Load dataset
 Clean dataset has unreliable low bw values and the NA low bw values removed
-```{r}
+```{r, warning = F, message = F}
 eqi_lbw_clean_df <- read_csv("data/eqi_lbw_clean_df.csv")
 
 ```
@@ -66,7 +65,7 @@ plot(resid(mod1_p,type="pearson"),ylab="Pearson residuals")
 
 #Prelim model just with EQI as exposure and low bw as outcome
 ##Quasipoisson model
-```{r}
+```{r, fig.width = 8, fig.height = 6}
 ######Fit a Quasipoisson model (which acounts for overdispersion)
 #fit the Poisson model (accounting for overdispersion)
 #no offset bc exposure unit is already same here

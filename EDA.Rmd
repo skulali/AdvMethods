@@ -14,6 +14,8 @@ library(mgcv)
 library(ggcorrplot)
 library(table1)
 library(xlsx)
+library(cowplot)
+library(ggplot2)
 ```
 
 # Template
@@ -252,6 +254,107 @@ eqi_lbw_clean_df |>
 ```
 Built is normally distributed.
 
+## num_low_birthweight_births and EQI
+
+```{r}
+eqi_lbw_plot =
+  eqi_lbw_clean_df |> 
+  ggplot(aes(x = eqi, y = num_low_birthweight_births)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  labs(title = "Scatterplot of EQI and Low Birth Weight Births",
+        x = "Environmental Quality Index (EQI)",
+        y = "Number of Low Birth Weight Births") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) 
+
+# ggsave("EDA_files/EQI_LBW_Distribution.png", eqi_lbw_plot, width = 8, height = 4, dpi = 300)
+```
+
+```{r}
+lbw_plot =
+  eqi_lbw_clean_df |> 
+  ggplot(aes(x = num_low_birthweight_births)) +
+  geom_histogram() +
+  labs(title = "Distribution of Low Birth Weight Births",
+        x = "Number of Low Birth Weight Births",
+        y = "Count") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) 
+
+eqi_plot =
+  eqi_lbw_clean_df |> 
+  ggplot(aes(x = eqi)) +
+  geom_histogram() +
+  labs(title = "Distribution of Environmental Quality Index (EQI)",
+        x = "Environmental Quality Index (EQI)",
+        y = "Count") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) 
+
+eqi_lbw_hist_plot = plot_grid(lbw_plot, eqi_plot, ncol = 2)
+
+# ggsave("EDA_files/EQI_LBW_Histograms.png", eqi_lbw_hist_plot, width = 10, height = 4, dpi = 300)
+```
+
+```{r}
+air_plot =
+  eqi_lbw_clean_df |> 
+  ggplot(aes(x = air)) +
+  geom_histogram() +
+  labs(title = "Distribution of Air Index",
+        x = "Air Index",
+        y = "Count") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) 
+
+land_plot =
+  eqi_lbw_clean_df |> 
+  ggplot(aes(x = land)) +
+  geom_histogram() +
+  labs(title = "Distribution of Land Index",
+        x = "Land Index",
+        y = "Count") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) 
+
+water_plot =
+  eqi_lbw_clean_df |> 
+  ggplot(aes(x = water)) +
+  geom_histogram() +
+  labs(title = "Distribution of Water Index",
+        x = "Water Index",
+        y = "Count") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) 
+
+built_plot =
+  eqi_lbw_clean_df |> 
+  ggplot(aes(x = built)) +
+  geom_histogram() +
+  labs(title = "Distribution of Built Index",
+        x = "Built Index",
+        y = "Count") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) 
+
+sociod_plot =
+  eqi_lbw_clean_df |> 
+  ggplot(aes(x = air)) +
+  geom_histogram() +
+  labs(title = "Distribution of Sociodemographic Index",
+        x = "Sociodemographic Index",
+        y = "Count") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) 
+
+
+sub_eqi_plot = plot_grid(air_plot, water_plot, land_plot, built_plot, sociod_plot, ncol = 2)
+
+# ggsave("EDA_files/Sub_EQI_Histograms.png", sub_eqi_plot, width = 10, height = 6, dpi = 300)
+```
+
+
 # Quick Look at Correlations (using Spearman)
 ```{r}
 
@@ -374,7 +477,7 @@ table1_df = data.frame(table1)
 # creating a table 2 based on the overall EQI
 
 table2_eqi = 
-  table1(~ `Environmental Quality Index` + `Air Domain Index` + `Water Domain Index` + `Land Domain Index` + `Built-Environment Domain Index` + `Sociodemographic Domain Index` + `Rural-Urban Continuum Codes` + `Live Births (#)` + `Low Birth Weight (#)` + `Low Birth Weight (%)` + `Non-Hispanic White (%)` + `African-American (%)` + `Asian (%)` + `American Indian / Alaskan Native (%)` + `Native Hawaiian / Other Pacific Islander (%)` + `Hispanic (%)` + `18-49 years old (%)` + `18-24 years old (%)` + `25-34 years old (%)` + `35-44 years old (%)` + `45-49 years old (%)` + `Rural (%)` + `Smokers (%)` | eqi_cat, data = tbl_data)
+  table1(~ `Environmental Quality Index` + `Air Domain Index` + `Water Domain Index` + `Land Domain Index` + `Built-Environment Domain Index` + `Sociodemographic Domain Index` + `Rural-Urban Continuum Codes` + `Live Births (#)` + `Low Birth Weight (#)` + `Low Birth Weight (%)` + `Non-Hispanic White (%)` + `African-American (%)` + `Asian (%)` + `American Indian / Alaskan Native (%)` + `Native Hawaiian / Other Pacific Islander (%)` + `Hispanic (%)` + `18-49 years old (%)` + `18-24 years old (%)` + `25-34 years old (%)` + `35-44 years old (%)` + `45-49 years old (%)` + `Rural (%)` + `Smokers (%)` | eqi_cat, data = tbl_data, caption = "Table 1: Demographic Characteristics by Environmental Quality Index Category per County in 2015")
 
 table2_eqi
 
