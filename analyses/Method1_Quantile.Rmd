@@ -1,0 +1,49 @@
+---
+title: "Method1_Quantile_Regression"
+output: html_document
+---
+
+# Set Up
+
+## Load packages
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(readr)
+library(readxl)
+library(splines)
+library(mgcv)
+library(ggcorrplot)
+library(table1)
+library(xlsx)
+library(cowplot)
+library(ggplot2)
+```
+
+## Setting template
+
+```{r}
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "right"))
+ 
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+## Load dataset
+
+```{r}
+eqi_lbw_clean_df = read_csv("data/eqi_lbw_clean_df.csv")
+```
