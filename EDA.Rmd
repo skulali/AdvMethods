@@ -418,8 +418,11 @@ eqi_lbw_clean_df |> ggplot(aes(x = perc_rural)) + geom_histogram()
 #super left skewed; pretty similar than large spike at 100%
 
 #which counties have the highest perc_rural?
-eqi_lbw_clean_df |> 
-  arrange(desc(perc_rural))
+rural_counties <- eqi_lbw_clean_df |> 
+  arrange(desc(perc_rural)) |> 
+  select(state_name, county_name, perc_rural)
+
+#view(rural_counties)
 
 #which counties have the lowest perc_rural?
 eqi_lbw_clean_df |> 
