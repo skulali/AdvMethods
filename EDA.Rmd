@@ -399,7 +399,7 @@ ggcorrplot(corr,
 
 ```
 
-# Confounder Exploration - examining rural, smoking, age
+# Confounder Exploration - examining rural, smoking, reproductive age for females
 ```{r}
 ###perc smokers across counties
 eqi_lbw_clean_df |> ggplot(aes(x = perc_smokers)) + geom_histogram()
@@ -445,25 +445,75 @@ eqi_lbw_clean_df |> ggplot(aes(x = perc_age3544)) + geom_histogram()
 eqi_lbw_clean_df |> ggplot(aes(x = perc_age4549)) + geom_histogram()
 #slight right tail
 
-num_low_birthweight_births
-log_live_births
-sociod
-built
-air
-land
-water
-eqi
-perc_smokers
-perc_rural
-perc_age1849
-perc_age1824
-perc_age2534
-perc_age3544
-perc_age4549
+```
 
+#Simple quasipoisson regression of Low birthweight counts (outcome) with each individual covariate
+```{r}
+simple_reg_lbw <- 
+  expand_grid(
+    outcome_name = c("num_low_birthweight_births"),
+    var_names = c("eqi", "perc_smokers", "perc_rural", "perc_age1849", "perc_age1824", 
+                  "perc_age2534","perc_age3544", "perc_age4549", "land", "air", "sociod", 
+                  "built", "water")
+  ) |> 
+  mutate(models = map2(outcome_name, var_names, \(o,v) glm(paste0(o, "~", v), data = eqi_lbw_clean_df, 
+                                                           family = quasipoisson, 
+                                                           offset = log_live_births)),
+         result = map(models, broom::tidy, conf.int=TRUE)) |> 
+  unnest(result) |> 
+  filter(term != "(Intercept)")
+
+simple_reg_signif_lbw <- simple_reg_lbw |> 
+  select(outcome_name, var_names, term, estimate, p.value, conf.low, conf.high) |> 
+  filter(p.value <= 0.05)
+
+view(simple_reg_signif_lbw)
 
 ```
 
+#Simple linear regression of EQI (exposure) with each individual covariate
+```{r}
+simple_reg_eqi <- 
+  expand_grid(
+    exp_name = c("eqi"),
+    var_names = c("perc_smokers", "perc_rural", "perc_age1849", "perc_age1824", 
+                  "perc_age2534","perc_age3544", "perc_age4549")
+  ) |> 
+  mutate(models = map2(exp_name, var_names, \(e,v) lm(paste0(e, "~", v), data = eqi_lbw_clean_df)),
+         result = map(models, broom::tidy, conf.int=TRUE)) |> 
+  unnest(result) |> 
+  filter(term != "(Intercept)")
+
+simple_reg_signif_eqi <- simple_reg_eqi |> 
+  select(exp_name, var_names, term, estimate, p.value, conf.low, conf.high) |> 
+  filter(p.value <= 0.05)
+
+view(simple_reg_signif_eqi)
+
+```
+
+#Simple linear regression of each subdomain (secondary exposure) with each individual covariate
+##CLEAN THIS up by domain
+```{r}
+simple_reg_domains <- 
+  expand_grid(
+    exp_name = c("air", "land", "water", "built", "sociod"),
+    var_names = c("perc_smokers", "perc_rural", "perc_age1849", "perc_age1824", 
+                  "perc_age2534","perc_age3544", "perc_age4549", "air", "land", 
+                  "water", "built", "sociod")
+  ) |> 
+  mutate(models = map2(exp_name, var_names, \(e,v) lm(paste0(e, "~", v), data = eqi_lbw_clean_df)),
+         result = map(models, broom::tidy, conf.int=TRUE)) |> 
+  unnest(result) |> 
+  filter(term != "(Intercept)")
+
+simple_reg_signif_domains <- simple_reg_domains |> 
+  select(exp_name, var_names, term, estimate, p.value, conf.low, conf.high) |> 
+  filter(p.value <= 0.05)
+
+view(simple_reg_signif_domains)
+
+```
 
 # Sumamry Tables
 
