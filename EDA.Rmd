@@ -13,7 +13,7 @@ library(splines)
 library(mgcv)
 library(ggcorrplot)
 library(table1)
-library(xlsx)
+#library(xlsx)
 library(cowplot)
 library(ggplot2)
 ```
@@ -146,7 +146,7 @@ IQR(eqi_lbw_clean_df$num_live_births, na.rm = TRUE)
 ```
 live birth counts are incredibly right skewed
 
-## EQI - higher means worse environment
+## EQI - higher means poorer environment
 ```{r}
 sum(is.na(eqi_lbw_clean_df$eqi))
 #no NAs
@@ -354,16 +354,16 @@ sub_eqi_plot = plot_grid(air_plot, water_plot, land_plot, built_plot, sociod_plo
 # ggsave("EDA_files/Sub_EQI_Histograms.png", sub_eqi_plot, width = 10, height = 6, dpi = 300)
 ```
 
-
 # Quick Look at Correlations (using Spearman)
 ```{r}
-
 cor_var <- eqi_lbw_clean_df |> 
   select(eqi, water, 
          built, air,
          land, sociod,
          num_low_birthweight_births,
-         num_live_births) |> 
+         num_live_births,
+         perc_smokers, perc_rural,
+         perc_age1849, perc_age1824, perc_age2534, perc_age3544, perc_age4549) |> 
   na.omit()
 
 ##Spearman correlations
@@ -398,6 +398,72 @@ ggcorrplot(corr,
            p.mat = p_mat)
 
 ```
+
+# Confounder Exploration - examining rural, smoking, age
+```{r}
+###perc smokers across counties
+eqi_lbw_clean_df |> ggplot(aes(x = perc_smokers)) + geom_histogram()
+#slight right tail
+
+#which counties have the highest perc_smokers?
+eqi_lbw_clean_df |> 
+  arrange(desc(perc_smokers))
+
+#which counties have the lowest perc_smokers?
+eqi_lbw_clean_df |> 
+  arrange(perc_smokers)
+
+###perc rural
+eqi_lbw_clean_df |> ggplot(aes(x = perc_rural)) + geom_histogram()
+#super left skewed; pretty similar than large spike at 100%
+
+#which counties have the highest perc_rural?
+eqi_lbw_clean_df |> 
+  arrange(desc(perc_rural))
+
+#which counties have the lowest perc_rural?
+eqi_lbw_clean_df |> 
+  arrange(perc_smokers)
+
+###perc_age1849 across counties (entire reproductive age range for females)
+eqi_lbw_clean_df |> ggplot(aes(x = perc_age1849)) + geom_histogram()
+#slight right tail
+
+###perc_age1824 for females across counties
+eqi_lbw_clean_df |> ggplot(aes(x = perc_age1824)) + geom_histogram()
+#right tail
+
+###perc_age2534 for females across counties
+eqi_lbw_clean_df |> ggplot(aes(x = perc_age2534)) + geom_histogram()
+#slight right tail
+
+###perc_age3544 for females across counties
+eqi_lbw_clean_df |> ggplot(aes(x = perc_age3544)) + geom_histogram()
+#normally distributed
+
+###perc_age4549 females across counties
+eqi_lbw_clean_df |> ggplot(aes(x = perc_age4549)) + geom_histogram()
+#slight right tail
+
+num_low_birthweight_births
+log_live_births
+sociod
+built
+air
+land
+water
+eqi
+perc_smokers
+perc_rural
+perc_age1849
+perc_age1824
+perc_age2534
+perc_age3544
+perc_age4549
+
+
+```
+
 
 # Sumamry Tables
 
