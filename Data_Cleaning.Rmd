@@ -35,6 +35,7 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 
 #Load and Clean EQI Data
+# Sharon plz add in cat_RUCC and regenerate dataset
 ```{r}
 #Load EQI data
 eqi_raw <- read_csv("data/2006_2010_EQI_2Jan2018_VC.csv") |> 
