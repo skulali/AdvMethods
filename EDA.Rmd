@@ -435,7 +435,6 @@ eqi_lbw_clean_df <- eqi_lbw_clean_df |>
                                                                       "nonmetropolitan-urbanized",
                                                                       "less urbanized",
                                                                       "thinly populated")))
-
 num_counties <- nrow(eqi_lbw_clean_df)
 
 rucc_cat_summary <- eqi_lbw_clean_df |> 
