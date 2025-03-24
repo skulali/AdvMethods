@@ -428,6 +428,25 @@ rural_counties <- eqi_lbw_clean_df |>
 eqi_lbw_clean_df |> 
   arrange(perc_smokers)
 
+###rural as a categorical variable from eqi dataset
+#make rucc categories a factor
+eqi_lbw_clean_df <- eqi_lbw_clean_df |> 
+  mutate(cat_rucc = factor(cat_rucc, levels = c("1","2","3", "4"),labels = c("metropolitan-urbanized",
+                                                                      "nonmetropolitan-urbanized",
+                                                                      "less urbanized",
+                                                                      "thinly populated")))
+
+num_counties <- nrow(eqi_lbw_clean_df)
+
+rucc_cat_summary <- eqi_lbw_clean_df |> 
+  count(cat_rucc) |> 
+  mutate(prop = n/num_counties*100)
+
+eqi_lbw_clean_df |> 
+  ggplot(aes(x = cat_rucc)) +
+  geom_bar() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 ###perc_age1849 across counties (entire reproductive age range for females)
 eqi_lbw_clean_df |> ggplot(aes(x = perc_age1849)) + geom_histogram()
 #slight right tail
@@ -457,7 +476,7 @@ simple_reg_lbw <-
     outcome_name = c("num_low_birthweight_births"),
     var_names = c("eqi", "perc_smokers", "perc_rural", "perc_age1849", "perc_age1824", 
                   "perc_age2534","perc_age3544", "perc_age4549", "land", "air", "sociod", 
-                  "built", "water")
+                  "built", "water", "cat_rucc")
   ) |> 
   mutate(models = map2(outcome_name, var_names, \(o,v) glm(paste0(o, "~", v), data = eqi_lbw_clean_df, 
                                                            family = quasipoisson, 
@@ -480,7 +499,7 @@ simple_reg_eqi <-
   expand_grid(
     exp_name = c("eqi"),
     var_names = c("perc_smokers", "perc_rural", "perc_age1849", "perc_age1824", 
-                  "perc_age2534","perc_age3544", "perc_age4549")
+                  "perc_age2534","perc_age3544", "perc_age4549", "cat_rucc")
   ) |> 
   mutate(models = map2(exp_name, var_names, \(e,v) lm(paste0(e, "~", v), data = eqi_lbw_clean_df)),
          result = map(models, broom::tidy, conf.int=TRUE)) |> 
