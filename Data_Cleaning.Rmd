@@ -173,8 +173,12 @@ eqi_df =
     eqi_5q_rucc1 = rucc1_eqi_2jan2018_vc_5,
     eqi_5q_rucc2 = rucc2_eqi_2jan2018_vc_5,
     eqi_5q_rucc3 = rucc3_eqi_2jan2018_vc_5,
-    eqi_5q_rucc4 = rucc4_eqi_2jan2018_vc_5
-  )
+    eqi_5q_rucc4 = rucc4_eqi_2jan2018_vc_5,
+    rucc = cat_rucc) |> 
+  mutate(cat_rucc = factor(rucc, levels = c("1","2","3", "4"),labels = c("metropolitan-urbanized",
+                                                                      "nonmetropolitan-urbanized",
+                                                                      "less urbanized",
+                                                                      "thinly populated")))
 
 dim(eqi_df)
 #3143 counties are captured in the eqi_df
