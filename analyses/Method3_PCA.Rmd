@@ -526,7 +526,7 @@ sd(water_df$w_chlordane_ln)
 water_pca_input_matrix_clean <- water_pca_input_matrix[, !zero_variance_cols]
 #saying if zero_variance_cols is TRUE then don't include in the dataset
 dim(water_pca_input_matrix_clean)
-water_pca_input_matrix_clean[, "w_ethylbenz_ln"]
+#water_pca_input_matrix_clean[, "w_ethylbenz_ln"]
 
 #PCA, center and scale data
 water_pca <- prcomp(water_pca_input_matrix_clean, center = TRUE, scale = TRUE) 
