@@ -1,6 +1,7 @@
 ---
 title: "Method3_PCA"
 output: html_document
+date: 2025-04-02
 ---
 
 # Set Up
@@ -13,13 +14,9 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(readr)
 library(readxl)
-library(splines)
-library(mgcv)
 library(ggcorrplot)
-library(table1)
-library(xlsx)
-library(cowplot)
-library(ggplot2)
+library(janitor)
+
 ```
 
 ## Setting template
@@ -42,8 +39,39 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
-## Load dataset
+## Load and Datasets
 
 ```{r}
-eqi_lbw_clean_df = read_csv("data/eqi_lbw_clean_df.csv")
+#main dataset
+eqi_lbw_clean_df <- read_csv("data/eqi_lbw_clean_df.csv")
+head(eqi_lbw_clean_df)
+dim(eqi_lbw_clean_df)
+
+#loading df with names of components that comprise each subdomain 
+pca_input_names_df <- read_xlsx(path = "data/Data_Dictionary_Variables_EQI_2006_2010.xlsx", 
+                                sheet = 1) |> 
+  clean_names(case = "snake")
+
+head(pca_input_names_df, n = 15)
+
+#loading df with transformed values of components that comprise each subdomain
+pca_input_variables_transformed_raw <- read_csv("data/PCA_Input_Variables.csv")
+
 ```
+
+# Clean PCA Input Variables Transformed Dataset
+```{r}
+#Add leading zeros to the stFIPS; code taken from the provided EQI README file 
+pca_input_variables_transformed_raw$stfips <- substr(as.numeric(pca_input_variables_transformed_raw$stfips) + 100000, 2,7)
+
+#rename variables
+pca_input_variables_transformed_raw <- pca_input_variables_transformed_raw |> rename(fips = stfips)
+
+#include only FIPS included in our main dataset
+pca_input_variables_transformed_df <- pca_input_variables_transformed_raw |> filter(fips %in% eqi_lbw_clean_df$fips)
+
+head(pca_input_variables_transformed_df)
+dim(pca_input_variables_transformed_df)
+
+```
+
