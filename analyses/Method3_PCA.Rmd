@@ -16,6 +16,8 @@ library(readr)
 library(readxl)
 library(ggcorrplot)
 library(janitor)
+library(factoextra)
+
 
 ```
 
@@ -39,7 +41,7 @@ scale_colour_discrete = scale_colour_viridis_d
 scale_fill_discrete = scale_fill_viridis_d
 ```
 
-## Load and Datasets
+## Load Datasets
 
 ```{r}
 #main dataset
@@ -52,14 +54,14 @@ pca_input_names_df <- read_xlsx(path = "data/Data_Dictionary_Variables_EQI_2006_
                                 sheet = 1) |> 
   clean_names(case = "snake")
 
-head(pca_input_names_df, n = 15)
+pca_input_names_df$variable_name <- tolower(pca_input_names_df$variable_name)
 
 #loading df with transformed values of components that comprise each subdomain
 pca_input_variables_transformed_raw <- read_csv("data/PCA_Input_Variables.csv")
 
 ```
 
-# Clean PCA Input Variables Transformed Dataset
+## Clean PCA Input Variables Transformed Dataset
 ```{r}
 #Add leading zeros to the stFIPS; code taken from the provided EQI README file 
 pca_input_variables_transformed_raw$stfips <- substr(as.numeric(pca_input_variables_transformed_raw$stfips) + 100000, 2,7)
@@ -70,8 +72,105 @@ pca_input_variables_transformed_raw <- pca_input_variables_transformed_raw |> re
 #include only FIPS included in our main dataset
 pca_input_variables_transformed_df <- pca_input_variables_transformed_raw |> filter(fips %in% eqi_lbw_clean_df$fips)
 
+names(pca_input_variables_transformed_df) <- tolower(names(pca_input_variables_transformed_df))
+
 head(pca_input_variables_transformed_df)
 dim(pca_input_variables_transformed_df)
+colnames(pca_input_variables_transformed_df)
 
 ```
+
+air built land socio water
+## Matrix for Air
+```{r}
+#filter for only for air subdomain components
+air_input_var_names <- pca_input_names_df |> filter(domain == "Air") 
+dim(air_input_var_names)
+#43 components in air domain
+
+#create df with only air components
+air_df <- pca_input_variables_transformed_df |> 
+  select(fips, all_of(air_input_var_names$variable_name))
+
+#create air matrix for pca
+##rows are participants, columns are air components
+##define rownames of matrix before running PCA
+air_pca_input_matrix <- air_df |> 
+  column_to_rownames("fips") |> 
+  as.matrix()
+
+```
+
+## Air PCA
+```{r}
+#PCA, center and scale data
+air_pca <- prcomp(air_pca_input_matrix, center = TRUE, scale = TRUE) 
+summary(air_pca)
+
+```
+
+## Air Eigenvalues
+```{r}
+#Air eigenvalues
+get_eig(air_pca)
+
+#Air screeplot; percentage of total variance explained by each PC
+fviz_eig(air_pca, main = "Air PCA",
+         xlab = "Principal component", addlabels=TRUE)
+
+```
+Air PC1 explains 28.1% of the total variation in the Air subdomain.
+
+## Air PCA Scores
+```{r}
+#PCA scores pertain to participants; these are the coordinates of our samples on the new PC axis
+#The PC scores are stored in the "x" value of the prcomp object
+#Extract air pc scores
+air_pc_scores <- air_pca$x
+
+#make df
+#rows are participants, columns have participants score within each PC
+air_pc_scores_df <- air_pc_scores |> 
+  as_tibble(rownames = "fips") #to go back to df format, convert rowname into column name
+
+nrow(air_pc_scores_df)
+head(air_pc_scores_df)
+
+#plot of PC1 by PC2
+air_pc_scores_df |>  
+  ggplot(aes(x = PC1, y = PC2)) +
+  geom_point()
+#seeing one big cluster of points; PCs are not grouping separately
+
+```
+
+## Air Loadings; examine which components have the most influence
+```{r}
+#extract loadings; pertains to components
+air_pc_loadings <- air_pca$rotation
+
+#make df
+air_pc_loadings_df <- air_pc_loadings |> 
+  as_tibble(rownames = "air_components")
+
+#Graph of All loadings in PC1
+air_pc_loadings_df |> 
+  ggplot(aes(x = air_components, y = PC1)) + 
+  geom_col() +
+  theme(legend.position = "bottom", axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_hline(yintercept = 0) +
+  labs(title = "Air PC1 Loadings")
+
+#Top 5 loadings with greatest magnitude in PC1
+air_pc_loadings_df |> 
+  arrange(desc(abs(PC1))) |> 
+  slice(1:5) |> 
+  ggplot(aes(x = air_components, y = PC1)) + 
+  geom_col() +
+  theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = "Top 10 Loadings for 1st Principal Component")
+
+```
+The top 5 air component loadings with greatest magnitude are a_ebenzine_ln, a_c2hcl3_ln, a_co_ln, a_dbp_ln, a_hcl_ln. These components are contributing the most to the variation captured in Air PC1.
+
 
