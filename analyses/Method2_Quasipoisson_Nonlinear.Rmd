@@ -47,3 +47,147 @@ scale_fill_discrete = scale_fill_viridis_d
 ```{r}
 eqi_lbw_clean_df = read_csv("data/eqi_lbw_clean_df.csv")
 ```
+
+# Models
+
+## Main model
+
+```{r}
+# eqi model
+
+mod1 = glm(num_low_birthweight_births ~ eqi + perc_rural + perc_age1849 + perc_smokers, 
+          data = eqi_lbw_clean_df, 
+          family = "quasipoisson", 
+          offset = log_live_births)
+
+summary(mod1)
+
+mod1_sum = 
+  mod1 |> 
+  tidy(conf.int = TRUE) |> 
+  mutate(
+    across(c(estimate, std.error, conf.low, conf.high), exp),
+    across(where(is.numeric), ~round(., digits = 3))) |> 
+  mutate(model = "1",
+         model = as.factor(model),
+         term = as.factor(term))
+```
+
+```{r}
+# subset model
+
+mod2 = glm(num_low_birthweight_births ~ water + air + land + built + sociod + perc_rural + perc_age1849 + perc_smokers, 
+          data = eqi_lbw_clean_df, 
+          family = "quasipoisson", 
+          offset = log_live_births)
+
+summary(mod2)
+
+mod2_sum = 
+  mod2 |> 
+  tidy(conf.int = TRUE) |> 
+  mutate(
+    across(c(estimate, std.error, conf.low, conf.high), exp),
+    across(where(is.numeric), ~round(., digits = 3))) |> 
+  mutate(model = "2",
+         model = as.factor(model),
+         term = as.factor(term))
+```
+
+```{r}
+# combining model 1 and 2
+
+main_models =
+  bind_rows(mod1_sum, mod2_sum)
+
+#write_csv(main_models, "outputs/main_models.csv")
+```
+
+## Spline models
+
+```{r}
+# eqi model
+
+mod3 = gam(num_low_birthweight_births ~ s(eqi) + s(perc_rural) + s(perc_age1849) + s(perc_smokers), 
+          data = eqi_lbw_clean_df, 
+          family = "quasipoisson", 
+          offset = log_live_births)
+
+summary(mod3)
+plot(mod3)
+
+mod3_sum =
+  mod3 |> 
+  tidy() |> 
+  mutate(
+    across(where(is.numeric), ~round(., digits = 3))) |> 
+  mutate(model = "3",
+         model = as.factor(model),
+         term = as.factor(term))
+```
+
+```{r}
+# subset model
+
+mod4 = gam(num_low_birthweight_births ~ s(water) + s(air) + s(land) + s(built) + s(sociod) + s(perc_rural) + s(perc_age1849) + s(perc_smokers), 
+          data = eqi_lbw_clean_df, 
+          family = "quasipoisson", 
+          offset = log_live_births)
+
+summary(mod4)
+plot(mod4)
+
+mod4_sum =
+  mod4 |> 
+  tidy() |> 
+  mutate(
+    across(where(is.numeric), ~round(., digits = 3))) |> 
+  mutate(model = "4",
+         model = as.factor(model),
+         term = as.factor(term))
+```
+
+```{r}
+# combining model 3 and 4
+
+spline_models =
+  bind_rows(mod3_sum, mod4_sum)
+
+# write_csv(spline_models, "outputs/spline_models.csv")
+```
+
+# Plots
+
+```{r}
+# creating a forrest plot of the main models
+
+main_models |> 
+  filter(term %in% c("eqi", "water", "air", "land", "built", "sociod", "perc_rural", "perc_age1849", "perc_smokers")) |> 
+  mutate(term = factor(term, levels = c("perc_smokers", "perc_age1849", "perc_rural", "sociod", "built", "land","air", "water","eqi"))) |> 
+  ggplot(aes(x = estimate, y = term, color = model)) + 
+  geom_pointrange(aes(xmin = conf.low, xmax = conf.high), size = 0.6, fatten = 2, position = position_dodge(width = 0.5)) +
+  geom_vline(xintercept = 1, linetype = "dashed", color = "black") +
+  labs(title = "Association Between Environmental Quality Index and Low Birth Weights",
+       x = "Risk Ratio (95% CI)",
+       y = "Coefficients")
+  theme_minimal() + 
+    theme(plot.title = element(hjust = 0.5, facr = "bold"),
+          axis.text = element_text(size = 10))
+```
+
+```{r, eval = F}
+# creating a spline plot
+
+png("outputs/combined_splines_plot.png", width = 14, height = 8, units = "in", res = 600)
+par(mfrow = c(2, 3), mar = c(4, 4, 2, 1), cex.main = 0.9)
+plot(mod3, select = 1, main = "A. EQI")
+plot(mod4, select = 1, main = "B. Water Quality Index")
+plot(mod4, select = 2, main = "C. Air Quality Index")
+plot(mod4, select = 3, main = "D. Land Quality Index")
+plot(mod4, select = 4, main = "E. Built Quality Index")
+plot(mod4, select = 5, main = "F. Sociodemographic Quality Index")
+dev.off()
+```
+
+
+
