@@ -45,7 +45,9 @@ scale_fill_discrete = scale_fill_viridis_d
 ## Load dataset
 
 ```{r}
-eqi_lbw_clean_df = read_csv("data/eqi_lbw_clean_df.csv")
+eqi_lbw_clean_df = 
+  read_csv("data/eqi_lbw_clean_df.csv") |> 
+  mutate(cat_rucc = factor(cat_rucc, levels = c("metropolitan-urbanized", "less urbanized", "thinly populated", "nonmetropolitan-urbanized")))
 ```
 
 # Models
@@ -55,7 +57,7 @@ eqi_lbw_clean_df = read_csv("data/eqi_lbw_clean_df.csv")
 ```{r}
 # eqi model
 
-mod1 = glm(num_low_birthweight_births ~ eqi + perc_rural + perc_age1849 + perc_smokers, 
+mod1 = glm(num_low_birthweight_births ~ eqi + cat_rucc + perc_age1849 + perc_smokers, 
           data = eqi_lbw_clean_df, 
           family = "quasipoisson", 
           offset = log_live_births)
@@ -76,7 +78,7 @@ mod1_sum =
 ```{r}
 # subset model
 
-mod2 = glm(num_low_birthweight_births ~ water + air + land + built + sociod + perc_rural + perc_age1849 + perc_smokers, 
+mod2 = glm(num_low_birthweight_births ~ water + air + land + built + sociod + cat_rucc + perc_age1849 + perc_smokers, 
           data = eqi_lbw_clean_df, 
           family = "quasipoisson", 
           offset = log_live_births)
