@@ -7,7 +7,7 @@ output: html_document
 
 ## Load packages
 
-```{r setup, include=FALSE}
+```{r}
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
@@ -17,7 +17,6 @@ library(splines)
 library(mgcv)
 library(ggcorrplot)
 library(table1)
-library(xlsx)
 library(cowplot)
 library(ggplot2)
 ```
@@ -45,5 +44,356 @@ scale_fill_discrete = scale_fill_viridis_d
 ## Load dataset
 
 ```{r}
-eqi_lbw_clean_df = read_csv("data/eqi_lbw_clean_df.csv")
+library(readr)
+library(tidyverse)
+#eqi_lbw_clean_df <- read_csv("~/Desktop/Files/AAMES/data/eqi_lbw_clean_df.csv")
 ```
+```{r}
+#install.packages("Qtools")
+```
+```{r}
+library(Qtools)
+library(quantreg)
+```
+
+# EQI 25th 
+```{r}
+eqi_lbw_clean_df |>
+  mutate(cat_rucc = factor(rucc, levels = c("metropolitan-urbanized", "less urbanized", "thinly populated", "nonmetropolitan-urbanized")))
+
+Mods25_eqi <- rq.counts(num_low_birthweight_births ~ eqi + cat_rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.25, offset= log_live_births, alpha =0.05)
+
+summary.rq(Mods25_eqi)
+```
+
+#EQI 50th 
+```{r}
+Mods50_eqi <- rq.counts(num_low_birthweight_births ~ eqi + cat_rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.50, offset= log_live_births, alpha =0.05)
+summary.rq(Mods50_eqi)
+```
+
+#EQI 75th 
+```{r}
+Mods75_eqi <- rq.counts(num_low_birthweight_births ~ eqi + cat_rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.75, offset= log_live_births, alpha =0.05)
+summary.rq(Mods75_eqi)
+```
+
+# Sociod 25 
+```{r}
+Mods25_sociod <- rq.counts(num_low_birthweight_births ~ sociod + cat_rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.25, offset= log_live_births, alpha =0.05)
+summary.rq(Mods25_sociod)
+```
+
+# Sociod 50 
+```{r}
+Mods50_sociod <- rq.counts(num_low_birthweight_births ~ sociod + cat_rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.50, offset= log_live_births, alpha =0.05)
+summary.rq(Mods50_sociod)
+```
+
+# Sociod 75 
+```{r}
+Mods75_sociod <- rq.counts(num_low_birthweight_births ~ sociod + cat_rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.75, offset= log_live_births, alpha =0.05)
+summary.rq(Mods75_sociod)
+```
+
+# Water 25 
+```{r}
+Mods25_water <- rq.counts(num_low_birthweight_births ~ water + cat_rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.25, offset= log_live_births, alpha =0.05)
+summary.rq(Mods25_water)
+```
+
+# Water 50 
+```{r}
+Mods50_water <- rq.counts(num_low_birthweight_births ~ water + cat_rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.50, offset= log_live_births, alpha =0.05)
+summary.rq(Mods50_water)
+```
+
+# Water 75 
+```{r}
+Mods75_water <- rq.counts(num_low_birthweight_births ~ water + cat_rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.75, offset= log_live_births, alpha =0.05)
+summary.rq(Mods75_water)
+```
+
+# Air 25 
+```{r}
+Mods25_air <- rq.counts(num_low_birthweight_births ~ air + cat_rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.25, offset= log_live_births, alpha =0.05)
+summary.rq(Mods25_air)
+```
+
+# Air 50 
+```{r}
+Mods50_air <- rq.counts(num_low_birthweight_births ~ air + cat_rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.50, offset= log_live_births, alpha =0.05)
+summary.rq(Mods50_air)
+```
+
+# Air 75 
+```{r}
+Mods75_air <- rq.counts(num_low_birthweight_births ~ air + cat_rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.75, offset= log_live_births, alpha =0.05)
+summary.rq(Mods75_air)
+```
+
+# Built 25 
+```{r}
+Mods25_built <- rq.counts(num_low_birthweight_births ~ built + cat_rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.25, offset= log_live_births, alpha =0.05)
+summary.rq(Mods25_built)
+```
+
+# Built 50 
+```{r}
+Mods50_built <- rq.counts(num_low_birthweight_births ~ built + cat_rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.50, offset= log_live_births, alpha =0.05)
+summary.rq(Mods50_built)
+```
+
+# Built 75
+```{r}
+Mods75_built <- rq.counts(num_low_birthweight_births ~ built + cat_rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.75, offset= log_live_births, alpha =0.05)
+summary.rq(Mods75_built)
+```
+
+# Land 25
+```{r}
+Mods25_land <- rq.counts(num_low_birthweight_births ~ land + cat_rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.25, offset= log_live_births, alpha =0.05)
+summary.rq(Mods25_land)
+```
+
+# Land 50
+```{r}
+Mods50_land <- rq.counts(num_low_birthweight_births ~ land + cat_rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.50, offset= log_live_births, alpha =0.05)
+summary.rq(Mods50_land)
+```
+
+# Land75
+```{r}
+Mods75_land <- rq.counts(num_low_birthweight_births ~ land + cat_rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.75, offset= log_live_births, alpha =0.05)
+summary.rq(Mods75_land)
+```
+
+# Summaries 
+
+```{r}
+summary25_eqi <- summary.rq(Mods25_eqi, alpha = 0.05)
+summary50_eqi <- summary.rq(Mods50_eqi, alpha = 0.05)
+summary75_eqi <- summary.rq(Mods75_eqi, alpha = 0.05)
+summary25_air <- summary.rq(Mods25_air, alpha = 0.05)
+summary50_air <- summary.rq(Mods50_air, alpha = 0.05)
+summary75_air <- summary.rq(Mods75_air, alpha = 0.05)
+summary25_water <- summary.rq(Mods25_water, alpha = 0.05)
+summary50_water <- summary.rq(Mods50_water, alpha = 0.05)
+summary75_water <- summary.rq(Mods75_water, alpha = 0.05)
+summary25_land <- summary.rq(Mods25_land, alpha = 0.05)
+summary50_land <- summary.rq(Mods50_land, alpha = 0.05)
+summary75_land <- summary.rq(Mods75_land, alpha = 0.05)
+summary25_built <- summary.rq(Mods25_built, alpha = 0.05)
+summary50_built <- summary.rq(Mods50_built, alpha = 0.05)
+summary75_built <- summary.rq(Mods75_built, alpha = 0.05)
+summary25_sociod <- summary.rq(Mods25_sociod, alpha = 0.05)
+summary50_sociod <- summary.rq(Mods50_sociod, alpha = 0.05)
+summary75_sociod <- summary.rq(Mods75_sociod, alpha = 0.05)
+```
+
+
+```{r}
+land_Model25th   <- c(summary25_land$coefficients[2,1:3])
+land_Model50th   <- c(summary50_land$coefficients[2,1:3])
+land_Model75th   <- c(summary75_land$coefficients[2,1:3])
+```
+
+```{r}
+water_Model25th   <- c(summary25_water$coefficients[2,1:3])
+water_Model50th   <- c(summary50_water$coefficients[2,1:3])
+water_Model75th   <- c(summary75_water$coefficients[2,1:3])
+```
+
+```{r}
+air_Model25th   <- c(summary25_air$coefficients[2,1:3])
+air_Model50th   <- c(summary50_air$coefficients[2,1:3])
+air_Model75th   <- c(summary75_air$coefficients[2,1:3])
+```
+
+```{r}
+sociod_Model25th   <- c(summary25_sociod$coefficients[2,1:3])
+sociod_Model50th   <- c(summary50_sociod$coefficients[2,1:3])
+sociod_Model75th   <- c(summary75_sociod$coefficients[2,1:3])
+```
+
+```{r}
+eqi_Model25th   <- c(summary25_eqi$coefficients[2,1:3])
+eqi_Model50th   <- c(summary50_eqi$coefficients[2,1:3])
+eqi_Model75th   <- c(summary75_eqi$coefficients[2,1:3])
+```
+
+```{r}
+land_coeff.table <- rbind(land_Model25th, land_Model50th, land_Model75th)
+land_coeff.table <- as.data.frame(land_coeff.table, stringsAsFactors = FALSE)
+
+# set names for dataframe
+
+names(land_coeff.table) <- c("coeff", "lci", "uci")
+land_coeff.table        <- land_coeff.table %>% 
+                      mutate(ModelName = c("land_Model 25th", "land_Model 50th", "land_Model 75th")) 
+
+#  Plot
+
+land_ForestPlot.25.50.75 <- ggplot(data=land_coeff.table, # defines what dataset we are using
+             aes(x=ModelName,  # defines variable for the x axis
+                 y=coeff,      # defines the variable for the point along the y axis
+                 ymin=lci,     # defines the lower bound of the confidence interval
+                 ymax=uci)) +  # define the upper bound of the confidence interval   
+  geom_pointrange() +          # creates a point (y) with line defined by ymin and ymax        
+  geom_errorbar()+             # creates lines with bars
+  geom_hline(aes(yintercept=0.0), lty=2) + # add a dashed line at y=0 
+  xlab("Model Name") +         # labels for axes
+  ylab(expression("Coefficient for Land"~" (95% CI)"))
+
+land_ForestPlot.25.50.75
+```
+
+```{r}
+air_coeff.table <- rbind(air_Model75th, air_Model75th, air_Model75th)
+air_coeff.table <- as.data.frame(air_coeff.table, stringsAsFactors = FALSE)
+
+# set names for dataframe
+
+names(air_coeff.table) <- c("coeff", "lci", "uci")
+air_coeff.table        <- air_coeff.table %>% 
+                      mutate(ModelName = c("air_Model 25th", "air_Model 50th", "air_Model 75th")) 
+
+#  Plot
+
+air_ForestPlot.25.50.75 <- ggplot(data=coeff.table, # defines what dataset we are using
+             aes(x=ModelName,  # defines variable for the x axis
+                 y=coeff,      # defines the variable for the point along the y axis
+                 ymin=lci,     # defines the lower bound of the confidence interval
+                 ymax=uci)) +  # define the upper bound of the confidence interval   
+  geom_pointrange() +          # creates a point (y) with line defined by ymin and ymax        
+  geom_errorbar()+             # creates lines with bars
+  geom_hline(aes(yintercept=0.0), lty=2) + # add a dashed line at y=0 
+  xlab("Model Name") +         # labels for axes
+  ylab(expression("Coefficient for Air"~" (95% CI)"))
+
+air_ForestPlot.25.50.75
+```
+
+
+```{r}
+water_coeff.table <- rbind(water_Model75th, water_Model75th, water_Model75th)
+water_coeff.table <- as.data.frame(water_coeff.table, stringsAsFactors = FALSE)
+
+# set names for dataframe
+
+names(water_coeff.table) <- c("coeff", "lci", "uci")
+water_coeff.table        <- water_coeff.table %>% 
+                      mutate(ModelName = c("water_Model 25th", "water_Model 50th", "water_Model 75th")) 
+
+#  Plot
+
+water_ForestPlot.25.50.75 <- ggplot(data=coeff.table, # defines what dataset we are using
+             aes(x=ModelName,  # defines variable for the x axis
+                 y=coeff,      # defines the variable for the point along the y axis
+                 ymin=lci,     # defines the lower bound of the confidence interval
+                 ymax=uci)) +  # define the upper bound of the confidence interval   
+  geom_pointrange() +          # creates a point (y) with line defined by ymin and ymax        
+  geom_errorbar()+             # creates lines with bars
+  geom_hline(aes(yintercept=0.0), lty=2) + # add a dashed line at y=0 
+  xlab("Model Name") +         # labels for axes
+  ylab(expression("Coefficient for Water"~" (95% CI)"))
+
+water_ForestPlot.25.50.75
+```
+
+```{r}
+built_coeff.table <- rbind(built_Model75th, built_Model75th, built_Model75th)
+built_coeff.table <- as.data.frame(built_coeff.table, stringsAsFactors = FALSE)
+
+# set names for dataframe
+
+names(built_coeff.table) <- c("coeff", "lci", "uci")
+built_coeff.table        <- land_coeff.table %>% 
+                      mutate(ModelName = c("built_Model 25th", "built_Model 50th", "built_Model 75th")) 
+
+#  Plot
+
+built_ForestPlot.25.50.75 <- ggplot(data=coeff.table, # defines what dataset we are using
+             aes(x=ModelName,  # defines variable for the x axis
+                 y=coeff,      # defines the variable for the point along the y axis
+                 ymin=lci,     # defines the lower bound of the confidence interval
+                 ymax=uci)) +  # define the upper bound of the confidence interval   
+  geom_pointrange() +          # creates a point (y) with line defined by ymin and ymax        
+  geom_errorbar()+             # creates lines with bars
+  geom_hline(aes(yintercept=0.0), lty=2) + # add a dashed line at y=0 
+  xlab("Model Name") +         # labels for axes
+  ylab(expression("Coefficient for Built"~" (95% CI)"))
+
+built_ForestPlot.25.50.75
+```
+
+```{r}
+sociod_coeff.table <- rbind(sociod_Model75th, sociod_Model75th, sociod_Model75th)
+sociod_coeff.table <- as.data.frame(sociod_coeff.table, stringsAsFactors = FALSE)
+
+# set names for dataframe
+
+names(sociod_coeff.table) <- c("coeff", "lci", "uci")
+sociod_coeff.table        <- sociod_coeff.table %>% 
+                      mutate(ModelName = c("sociod_Model 25th", "sociod_Model 50th", "sociod_Model 75th")) 
+
+#  Plot
+
+sociod_ForestPlot.25.50.75 <- ggplot(data=coeff.table, # defines what dataset we are using
+             aes(x=ModelName,  # defines variable for the x axis
+                 y=coeff,      # defines the variable for the point along the y axis
+                 ymin=lci,     # defines the lower bound of the confidence interval
+                 ymax=uci)) +  # define the upper bound of the confidence interval   
+  geom_pointrange() +          # creates a point (y) with line defined by ymin and ymax        
+  geom_errorbar()+             # creates lines with bars
+  geom_hline(aes(yintercept=0.0), lty=2) + # add a dashed line at y=0 
+  xlab("Model Name") +         # labels for axes
+  ylab(expression("Coefficient for Sociod"~" (95% CI)"))
+
+sociod_ForestPlot.25.50.75
+```
+
+```{r}
+eqi_coeff.table <- rbind(eqi_Model75th, eqi_Model75th, eqi_Model75th)
+eqi_coeff.table <- as.data.frame(eqi_coeff.table, stringsAsFactors = FALSE)
+
+# set names for dataframe
+
+names(eqi_coeff.table) <- c("coeff", "lci", "uci")
+eqi_coeff.table        <- eqi_coeff.table %>% 
+                      mutate(ModelName = c("eqi_Model 25th", "eqi_Model 50th", "eqi_Model 75th")) 
+
+#  Plot
+
+eqi_ForestPlot.25.50.75 <- ggplot(data=coeff.table, # defines what dataset we are using
+             aes(x=ModelName,  # defines variable for the x axis
+                 y=coeff,      # defines the variable for the point along the y axis
+                 ymin=lci,     # defines the lower bound of the confidence interval
+                 ymax=uci)) +  # define the upper bound of the confidence interval   
+  geom_pointrange() +          # creates a point (y) with line defined by ymin and ymax        
+  geom_errorbar()+             # creates lines with bars
+  geom_hline(aes(yintercept=0.0), lty=2) + # add a dashed line at y=0 
+  xlab("Model Name") +         # labels for axes
+  ylab(expression("Coefficient for EQI"~" (95% CI)"))
+
+eqi_ForestPlot.25.50.75
+```
+

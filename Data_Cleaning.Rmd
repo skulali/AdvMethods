@@ -373,11 +373,20 @@ sum(is.na(eqi_lbw_clean_df$log_live_births))
 ```
 Our cleaned dataset has 2995 counties
 
+# Creating a dataset for sensitivity analyses removing water values below -1
+```{r}
+eqi_lbw_sensitivity_df =
+  eqi_lbw_clean_df |> 
+  filter(water>(-1))
+```
+
+
 #Write the combined dataset
 ```{r}
 #write_csv(eqi_lbw_raw_df,"data/eqi_lbw_raw_df.csv")
 
 #write_csv(eqi_lbw_clean_df,"data/eqi_lbw_clean_df.csv")
 
+#write_csv(eqi_lbw_sensitivity_df,"data/eqi_lbw_sensitivity_df.csv")
 ```
 raw dataset has unreliable low bw values and the NA low bw values while cleaned dataset does not
