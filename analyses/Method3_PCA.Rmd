@@ -170,7 +170,7 @@ air_pc_loadings_df |>
   labs(title = "Air PC1: Top 3 Absolute Loadings")
 
 ```
-The top 3 absolute loadings for Air PC1 a_ebenzine_ln, a_c2hcl3_ln, and a_co_ln These components are contributing the most to the variation captured in Air PC1.
+The top 3 absolute loadings for Air PC1 are a_ebenzine_ln (Ethylbenzene), a_c2hcl3_ln (Trichloroethylene), and a_co_ln (Cobalt compounds). These components are contributing the most to the variation captured in Air PC1.
 
 ## Matrix for Built
 ```{r}
@@ -261,7 +261,7 @@ built_pc_loadings_df |>
   labs(title = "Built PC1: Top 3 Absolute Loadings")
 
 ```
-The top 3 absolute loadings for Built PC1 are ss_env_rate_ln, rec_env_rate_ln, and ed_env_rate_ln. These components are contributing the most to the variation captured in Built PC1.
+The top 3 absolute loadings for Built PC1 are ss_env_rate_ln (Rate of social service agencies per county), rec_env_rate_ln (Rate of recreation-related businesses per county), and ed_env_rate_ln (Rate of education-related business per county). These components are contributing the most to the variation captured in Built PC1.
 
 ## Matrix for Land
 ```{r}
@@ -301,7 +301,7 @@ fviz_eig(land_pca, main = "Land PCA",
          xlab = "Principal component", addlabels=TRUE)
 
 ```
-Land PC1 explains 27.7% of the total variation in the Land subdomain. PC2 explaines 14.2% of total variation in Land subdomain.
+Land PC1 explains 27.7% of the total variation in the Land subdomain. PC2 explains 14.2% of total variation in Land subdomain.
 
 ## Land PCA Scores
 ```{r}
@@ -369,9 +369,8 @@ land_pc_loadings_df |>
   labs(title = "Land PC2: Top 3 Absolute Loadings")
 
 ```
-The top 3 absolute loadings for Land PC1 are pct_harvested_acres_ln, pct_disease_acres_ln, and pct_manure_acres_ln. These components are contributing the most to the variation captured in Land PC1.
-The top 3 absolute loadings for Land PC2 are insecticide_ln, fungicide_ln, and pct_au_ln. These components are contributing the most to the variation captured in Land PC1.
-
+The top 3 absolute loadings for Land PC1 are pct_harvested_acres_ln (Harvested acres, acres harvested per county acres), pct_disease_acres_ln (Chemicals used to control Diseases in crops and orchards, acres applied per county acres), and pct_manure_acres_ln (Manure, acres applied per county acres). These components are contributing the most to the variation captured in Land PC1.
+The top 3 absolute loadings for Land PC2 are insecticide_ln (Insecticide applied), fungicide_ln (Fungicides applied), and pct_au_ln (Animal Units, animal units per county acres). These components are contributing the most to the variation captured in Land PC2.
 
 ## Matrix for Sociodemographic
 ```{r}
@@ -479,9 +478,9 @@ sociod_pc_loadings_df |>
   theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(title = "Sociod PC2: Top 3 Absolute Loadings")
 ```
-The top 3 absolute loadings for Sociod PC1 are num_creatclass, pct_bs, and med_hh_value. These components are contributing the most to the variation captured in Sociod PC1.
-The top 3 absolute loadings for Sociod PC2 are gini_est, pct_renterocc, and pct_fam_pov. These components are contributing the most to the variation captured in Sociod PC2.
+The top 3 absolute loadings for Sociod PC1 are num_creatclass (Percent county employed in creative class), pct_bs (Bachelor's degree or higher, percent of persons age 25 years+), and med_hh_value (Median household value). These components are contributing the most to the variation captured in Sociod PC1.
 
+The top 3 absolute loadings for Sociod PC2 are gini_est (Measure of income inequality), pct_renterocc (Percent renter-occupied units), and pct_fam_pov (Percent of families in poverty). These components are contributing the most to the variation captured in Sociod PC2.
 
 ## Matrix for Water
 ```{r}
@@ -613,8 +612,8 @@ water_pc_loadings_df |>
   theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(title = "Water PC2: Top 3 Absolute Loadings")
 ```
-The top 3 absolute loadings for Water PC1 are w_c2cl4_ln, w_trichlorene_ln, and w_benzene_ln These components are contributing the most to the variation captured in Water PC1.
-The top 3 absolute loadings for Water PC2 are w_picloram_ln, w_dinoseb_ln, and w_endrin_ln These components are contributing the most to the variation captured in Water PC2.
+The top 3 absolute loadings for Water PC1 are w_c2cl4_ln (Tetrachloroethylene), w_trichlorene_ln (Trichloroethylene), and w_benzene_ln (Monochlorobenzene (Chlorobenzene)) These components are contributing the most to the variation captured in Water PC1.
 
+The top 3 absolute loadings for Water PC2 are w_picloram_ln (Picloram), w_dinoseb_ln (Dinoseb), and w_endrin_ln (Endrin). These components are contributing the most to the variation captured in Water PC2.
 
 
