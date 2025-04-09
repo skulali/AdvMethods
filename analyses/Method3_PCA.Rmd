@@ -17,6 +17,8 @@ library(readxl)
 library(ggcorrplot)
 library(janitor)
 library(factoextra)
+library(Qtools)
+library(quantreg)
 
 
 ```
@@ -615,5 +617,55 @@ water_pc_loadings_df |>
 The top 3 absolute loadings for Water PC1 are w_c2cl4_ln (Tetrachloroethylene), w_trichlorene_ln (Trichloroethylene), and w_benzene_ln (Monochlorobenzene (Chlorobenzene)) These components are contributing the most to the variation captured in Water PC1.
 
 The top 3 absolute loadings for Water PC2 are w_picloram_ln (Picloram), w_dinoseb_ln (Dinoseb), and w_endrin_ln (Endrin). These components are contributing the most to the variation captured in Water PC2.
+
+quantile reg
+```{r}
+eqi_lbw_clean_df <- eqi_lbw_clean_df |> 
+  mutate(cat_rucc = as.factor(cat_rucc, levels = c("metropolitan-urbanized", "less urbanized", "thinly populated", "nonmetropolitan-urbanized")))
+
+colnames(eqi_lbw_clean_df)
+
+mod_50 <- rq.counts(num_low_birthweight_births ~ eqi + , data = eqi_lbw_clean_df, tau = 0.25, 
+                    offset = log_live_births, alpha = 0.05)
+
+mod_50_st <- rq.counts(num_low_birthweight_births ~ eqi + cat_rucc + perc_smokers + perc_age1849, data = eqi_lbw_clean_df, tau = 0.25, 
+                    offset = log_live_births, alpha = 0.05)
+
+min(eqi_lbw_clean_df$num_low_birthweight_births)
+
+summary.rq(mod_50)
+summary.rq(mod_50_st)
+
+a <- log2(eqi_lbw_clean_df$num_low_birthweight_births)
+
+eqi_lbw_clean_df |> select(fips, eqi_2q)
+
+ModMean.Beta.pm.fit <- summary.rq(mod_50)$coefficients[2,1]
+ModMean.Beta.pm.se  <- summary.rq(mod_50)$coefficients[2,2]
+ModMean.Beta.pm.lci <- ModMean.Beta.pm.fit - 1.96 * ModMean.Beta.pm.se
+ModMean.Beta.pm.uci <- ModMean.Beta.pm.fit + 1.96 * ModMean.Beta.pm.se
+
+print(paste0("Association for PM2.5 and Mean BMI: ", 
+             round(ModMean.Beta.pm.fit, 3), " 95% CI: (",
+             round(ModMean.Beta.pm.lci, 3), ", ", 
+             round(ModMean.Beta.pm.uci, 3), ")"))
+
+#trying categorical
+new_df <- eqi_lbw_clean_df |> mutate(eqi_cat =  cut(eqi, 
+                  breaks = quantile(eqi, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE),
+                  labels = c("Excellent", "Good", "Fair", "Poor")))
+
+table(new_df$eqi_cat)
+
+mod_50_cat <- rq.counts(num_low_birthweight_births ~ eqi_cat + cat_rucc + perc_age1849 + 
+                      perc_smokers, data = new_df, tau = 0.5, 
+                    offset = log_live_births, alpha = 0.05)
+
+summary.rq(mod_50_cat)
+
+hist(eqi_lbw_clean_df$eqi)
+
+
+```
 
 
