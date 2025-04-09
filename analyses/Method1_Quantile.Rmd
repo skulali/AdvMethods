@@ -7,7 +7,7 @@ output: html_document
 
 ## Load packages
 
-```{r setup, include=FALSE}
+```{r}
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
@@ -17,7 +17,6 @@ library(splines)
 library(mgcv)
 library(ggcorrplot)
 library(table1)
-library(xlsx)
 library(cowplot)
 library(ggplot2)
 ```
@@ -45,5 +44,26 @@ scale_fill_discrete = scale_fill_viridis_d
 ## Load dataset
 
 ```{r}
-eqi_lbw_clean_df = read_csv("data/eqi_lbw_clean_df.csv")
+library(readr)
+library(tidyverse)
+eqi_lbw_clean_df <- read_csv("~/Desktop/Files/AAMES/data/eqi_lbw_clean_df.csv")
 ```
+```{r}
+install.packages("Qtools")
+```
+```{r}
+library(Qtools)
+```
+
+```{r}
+Mods25_eqi <- rq.counts(num_low_birthweight_births ~ eqi + rucc + perc_smokers + perc_age1849, 
+            data = eqi_lbw_clean_df, tau= 0.25, offset= log_live_births, alpha =0.05)
+
+eqi_lbw_clean_df |>
+  mutate(cat_rucc = factor(rucc, levels = c("metropolitan-urbanized", "less urbanized", "thinly populated", "nonmetropolitan-urbanized")))
+```
+```{r}
+library(quantreg)
+summary.rq(Mods25_eqi)
+```
+
