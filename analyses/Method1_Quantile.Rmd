@@ -50,6 +50,7 @@ scale_fill_discrete = scale_fill_viridis_d
 eqi_lbw_clean_df = 
   read_csv("data/eqi_lbw_clean_df.csv") |> 
   mutate(cat_rucc = factor(cat_rucc, levels = c("metropolitan-urbanized", "less urbanized", "thinly populated", "nonmetropolitan-urbanized")))
+
 ```
 
 # EQI 25th 
@@ -177,7 +178,204 @@ summary.rq(Mods50_land)
 Mods75_land <- rq.counts(num_low_birthweight_births ~ land + cat_rucc + perc_smokers + perc_age1849, 
             data = eqi_lbw_clean_df, tau= 0.75, offset= log_live_births, alpha =0.05)
 summary.rq(Mods75_land)
+
 ```
+
+# Function to extract estimates, lci, uci
+```{r}
+rq_summary_func <- function(model, domain, tau) {
+  summary <- summary.rq(model, alpha = 0.05)
+  estimate  <- summary$coefficients[2,1]
+  se  <- summary$coefficients[2,2]
+  lci <- estimate - 1.96 * se
+  uci <- estimate + 1.96 * se
+  
+  df <- data.frame(domain = domain,
+                      tau = tau, 
+                      estimate = estimate, 
+                      se = se,
+                      lci = lci, 
+                      uci = uci)
+
+  return(df)
+}
+
+Mods25_eqi_df <- rq_summary_func(Mods25_eqi, "eqi", "0.25")
+Mods50_eqi_df <- rq_summary_func(Mods50_eqi, "eqi", "0.50")
+Mods75_eqi_df <- rq_summary_func(Mods75_eqi, "eqi", "0.75")
+Mods25_air_df <- rq_summary_func(Mods25_air, "air", "0.25")
+Mods50_air_df <- rq_summary_func(Mods50_air, "air", "0.50")
+Mods75_air_df <- rq_summary_func(Mods75_air, "air", "0.75")
+Mods25_built_df <- rq_summary_func(Mods25_built, "built", "0.25")
+Mods50_built_df <- rq_summary_func(Mods50_built, "built", "0.50")
+Mods75_built_df <- rq_summary_func(Mods75_built, "built", "0.75")
+Mods25_land_df <- rq_summary_func(Mods25_land, "land", "0.25")
+Mods50_land_df <- rq_summary_func(Mods50_land, "land", "0.50")
+Mods75_land_df <- rq_summary_func(Mods75_land, "land", "0.75")
+Mods25_sociod_df <- rq_summary_func(Mods25_sociod, "sociod", "0.25")
+Mods50_sociod_df <- rq_summary_func(Mods50_sociod, "sociod", "0.50")
+Mods75_sociod_df <- rq_summary_func(Mods75_sociod, "sociod", "0.75")
+Mods25_water_df <- rq_summary_func(Mods25_water, "water", "0.25")
+Mods50_water_df <- rq_summary_func(Mods50_water, "water", "0.50")
+Mods75_water_df <- rq_summary_func(Mods75_water, "water", "0.75")
+
+combo <- rbind(Mods25_eqi_df, Mods50_eqi_df, Mods75_eqi_df, Mods25_air_df, Mods50_air_df, Mods75_air_df, 
+               Mods25_built_df, Mods50_built_df, Mods75_built_df, Mods25_land_df, Mods50_land_df, Mods75_land_df,
+               Mods25_sociod_df, Mods50_sociod_df, Mods75_sociod_df, Mods25_water_df, 
+               Mods50_water_df, Mods75_water_df)
+
+#exponentiating the coefficients
+combo_exp <- combo |> 
+  mutate(exp_estimate = exp(estimate),
+         exp_lci = exp(lci),
+         exp_uci = exp(uci))
+
+
+```
+
+##Forest plots below use the risk ratio but can alternatively use the coefficient from the model (estimate, lci, uci which are the coefficients on the log scale)
+
+# Forest Plot: EQI
+```{r}
+#  Plot
+eqi_summaries <- combo_exp |> filter(domain == "eqi")
+
+eqi_plot <- ggplot(data=eqi_summaries, # defines what dataset we are using
+             aes(x=tau,  # defines variable for the x axis
+                 y=exp_estimate,      # defines the variable for the point along the y axis
+                 ymin=exp_lci,     # defines the lower bound of the confidence interval
+                 ymax=exp_uci)) +  # define the upper bound of the confidence interval   
+  geom_pointrange() +          # creates a point (y) with line defined by ymin and ymax        
+  geom_errorbar()+             # creates lines with bars
+  geom_hline(aes(yintercept=0.0), lty=2) + # add a dashed line at y=0 
+  labs( 
+    title = "EQI",
+    x = "Quantile",
+    y=(expression("Risk Ratio "~" (95% CI)")) #label for axes
+  )
+
+eqi_plot
+
+```
+
+# Forest Plot: Air
+```{r}
+#  Plot
+air_summaries <- combo_exp |> filter(domain == "air")
+
+air_plot <- ggplot(data=air_summaries, # defines what dataset we are using
+             aes(x=tau,  # defines variable for the x axis
+                 y=exp_estimate,      # defines the variable for the point along the y axis
+                 ymin=exp_lci,     # defines the lower bound of the confidence interval
+                 ymax=exp_uci)) +  # define the upper bound of the confidence interval   
+  geom_pointrange() +          # creates a point (y) with line defined by ymin and ymax        
+  geom_errorbar()+             # creates lines with bars
+  geom_hline(aes(yintercept=0.0), lty=2) + # add a dashed line at y=0 
+  labs( 
+    title = "Air",
+    x = "Quantile",
+    y=(expression("Risk Ratio "~" (95% CI)")) #label for axes
+  )
+
+air_plot
+
+```
+
+# Forest Plot: Built
+```{r}
+#  Plot
+built_summaries <- combo_exp |> filter(domain == "built")
+
+built_plot <- ggplot(data=built_summaries, # defines what dataset we are using
+             aes(x=tau,  # defines variable for the x axis
+                 y=exp_estimate,      # defines the variable for the point along the y axis
+                 ymin=exp_lci,     # defines the lower bound of the confidence interval
+                 ymax=exp_uci)) +  # define the upper bound of the confidence interval   
+  geom_pointrange() +          # creates a point (y) with line defined by ymin and ymax        
+  geom_errorbar()+             # creates lines with bars
+  geom_hline(aes(yintercept=0.0), lty=2) + # add a dashed line at y=0 
+  labs( 
+    title = "Built",
+    x = "Quantile",
+    y=(expression("Risk Ratio "~" (95% CI)")) #label for axes
+  )
+
+built_plot
+
+```
+
+# Forest Plot: Land
+```{r}
+#  Plot
+land_summaries <- combo_exp |> filter(domain == "land")
+
+land_plot <- ggplot(data=land_summaries, # defines what dataset we are using
+             aes(x=tau,  # defines variable for the x axis
+                 y=exp_estimate,      # defines the variable for the point along the y axis
+                 ymin=exp_lci,     # defines the lower bound of the confidence interval
+                 ymax=exp_uci)) +  # define the upper bound of the confidence interval   
+  geom_pointrange() +          # creates a point (y) with line defined by ymin and ymax        
+  geom_errorbar()+             # creates lines with bars
+  geom_hline(aes(yintercept=0.0), lty=2) + # add a dashed line at y=0 
+  labs( 
+    title = "Land",
+    x = "Quantile",
+    y=(expression("Risk Ratio "~" (95% CI)")) #label for axes
+  )
+
+land_plot
+
+```
+
+# Forest Plot: Sociod
+```{r}
+#  Plot
+sociod_summaries <- combo_exp |> filter(domain == "sociod")
+
+sociod_plot <- ggplot(data=sociod_summaries, # defines what dataset we are using
+             aes(x=tau,  # defines variable for the x axis
+                 y=exp_estimate,      # defines the variable for the point along the y axis
+                 ymin=exp_lci,     # defines the lower bound of the confidence interval
+                 ymax=exp_uci)) +  # define the upper bound of the confidence interval   
+  geom_pointrange() +          # creates a point (y) with line defined by ymin and ymax        
+  geom_errorbar()+             # creates lines with bars
+  geom_hline(aes(yintercept=0.0), lty=2) + # add a dashed line at y=0 
+  labs( 
+    title = "Sociod",
+    x = "Quantile",
+    y=(expression("Risk Ratio "~" (95% CI)")) #label for axes
+  )
+
+sociod_plot
+
+```
+
+# Forest Plot: Water
+```{r}
+#  Plot
+water_summaries <- combo_exp |> filter(domain == "water")
+
+water_plot <- ggplot(data=water_summaries, # defines what dataset we are using
+             aes(x=tau,  # defines variable for the x axis
+                 y=exp_estimate,      # defines the variable for the point along the y axis
+                 ymin=exp_lci,     # defines the lower bound of the confidence interval
+                 ymax=exp_uci)) +  # define the upper bound of the confidence interval   
+  geom_pointrange() +          # creates a point (y) with line defined by ymin and ymax        
+  geom_errorbar()+             # creates lines with bars
+  geom_hline(aes(yintercept=0.0), lty=2) + # add a dashed line at y=0 
+  labs( 
+    title = "Water",
+    x = "Quantile",
+    y=(expression("Risk Ratio "~" (95% CI)")) #label for axes
+  )
+
+water_plot
+
+```
+
+
+#####END OF CODE#####
+###Below is older code###
 
 # Summaries 
 

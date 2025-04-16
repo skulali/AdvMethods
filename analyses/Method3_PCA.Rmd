@@ -44,7 +44,6 @@ scale_fill_discrete = scale_fill_viridis_d
 ```
 
 ## Load Datasets
-
 ```{r}
 #main dataset
 eqi_lbw_clean_df <- read_csv("data/eqi_lbw_clean_df.csv")
