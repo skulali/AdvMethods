@@ -102,6 +102,42 @@ air_pca_input_matrix <- air_df |>
 
 ```
 
+## Air Spearman Correlations
+```{r}
+air_corr_inputs <- air_df |> select(-fips)
+
+##Spearman correlations
+air_corr <- round(cor(air_corr_inputs, method = "spearman"), 2)
+
+#calculate p-values for spearman correlations
+p_mat <- cor_pmat(air_corr_inputs)
+
+#simple plot
+ggcorrplot(air_corr)
+
+#hiearchial clustering
+ggcorrplot(air_corr, hc.order = TRUE, outline.color = "white")
+
+#lower triangle
+ggcorrplot(air_corr,
+           hc.order = TRUE,
+           type = "lower",
+           outline.color = "white")
+
+#add correlation values onto plot
+ggcorrplot(air_corr,
+           hc.order = TRUE,
+           type = "lower",
+           lab = TRUE)
+
+#add correlation significance level
+#X marks the not signif correlations (Barring the no significant coefficient)
+ggcorrplot(air_corr,
+           hc.order = TRUE,
+           type = "lower",
+           p.mat = p_mat)
+```
+
 ## Air PCA
 ```{r}
 #PCA, center and scale data
@@ -194,6 +230,42 @@ built_pca_input_matrix <- built_df |>
 
 ```
 
+## Built Spearman Correlations
+```{r}
+built_corr_inputs <- built_df |> select(-fips)
+
+##Spearman correlations
+built_corr <- round(cor(built_corr_inputs, method = "spearman"), 2)
+
+#calculate p-values for spearman correlations
+p_mat <- cor_pmat(built_corr_inputs)
+
+#simple plot
+ggcorrplot(built_corr)
+
+#hiearchial clustering
+ggcorrplot(built_corr, hc.order = TRUE, outline.color = "white")
+
+#lower triangle
+ggcorrplot(built_corr,
+           hc.order = TRUE,
+           type = "lower",
+           outline.color = "white")
+
+#add correlation values onto plot
+ggcorrplot(built_corr,
+           hc.order = TRUE,
+           type = "lower",
+           lab = TRUE)
+
+#add correlation significance level
+#X marks the not signif correlations (Barring the no significant coefficient)
+ggcorrplot(built_corr,
+           hc.order = TRUE,
+           type = "lower",
+           p.mat = p_mat)
+```
+
 ## Built PCA
 ```{r}
 #PCA, center and scale data
@@ -283,6 +355,42 @@ land_pca_input_matrix <- land_df |>
   column_to_rownames("fips") |> 
   as.matrix()
 
+```
+
+## Land Spearman Correlations
+```{r}
+land_corr_inputs <- land_df |> select(-fips)
+
+##Spearman correlations
+land_corr <- round(cor(land_corr_inputs, method = "spearman"), 2)
+
+#calculate p-values for spearman correlations
+p_mat <- cor_pmat(land_corr_inputs)
+
+#simple plot
+ggcorrplot(land_corr)
+
+#hiearchial clustering
+ggcorrplot(land_corr, hc.order = TRUE, outline.color = "white")
+
+#lower triangle
+ggcorrplot(land_corr,
+           hc.order = TRUE,
+           type = "lower",
+           outline.color = "white")
+
+#add correlation values onto plot
+ggcorrplot(land_corr,
+           hc.order = TRUE,
+           type = "lower",
+           lab = TRUE)
+
+#add correlation significance level
+#X marks the not signif correlations (Barring the no significant coefficient)
+ggcorrplot(land_corr,
+           hc.order = TRUE,
+           type = "lower",
+           p.mat = p_mat)
 ```
 
 ## Land PCA
@@ -394,6 +502,42 @@ sociod_pca_input_matrix <- sociod_df |>
 
 ```
 
+## Sociod Spearman Correlations
+```{r}
+sociod_corr_inputs <- sociod_df |> select(-fips)
+
+##Spearman correlations
+sociod_corr <- round(cor(sociod_corr_inputs, method = "spearman"), 2)
+
+#calculate p-values for spearman correlations
+p_mat <- cor_pmat(sociod_corr_inputs)
+
+#simple plot
+ggcorrplot(sociod_corr)
+
+#hiearchial clustering
+ggcorrplot(sociod_corr, hc.order = TRUE, outline.color = "white")
+
+#lower triangle
+ggcorrplot(sociod_corr,
+           hc.order = TRUE,
+           type = "lower",
+           outline.color = "white")
+
+#add correlation values onto plot
+ggcorrplot(sociod_corr,
+           hc.order = TRUE,
+           type = "lower",
+           lab = TRUE)
+
+#add correlation significance level
+#X marks the not signif correlations (Barring the no significant coefficient)
+ggcorrplot(sociod_corr,
+           hc.order = TRUE,
+           type = "lower",
+           p.mat = p_mat)
+```
+
 ## Sociod PCA
 ```{r}
 #PCA, center and scale data
@@ -491,7 +635,7 @@ water_input_var_names <- pca_input_names_df |> filter(domain == "Water")
 dim(water_input_var_names)
 #51 components in sociod domain
 
-#create df with only sociod components
+#create df with only water components
 water_df <- pca_input_variables_transformed_df |> 
   select(fips, all_of(water_input_var_names$variable_name))
 
@@ -503,6 +647,55 @@ water_pca_input_matrix <- water_df |>
   as.matrix()
 dim(water_pca_input_matrix)
 
+```
+
+## Water Spearman Correlations
+```{r}
+water_corr_inputs <- water_df |> select(-fips)
+
+#Since Spearman correlation is based on ranks, a variable with zero variance (no variation) can't be ranked meaningfully.
+
+#Identify columns with zero variance (constant columns)
+water_zero_variance_cols <- apply(water_corr_inputs, 2, function(x) sd(x) == 0)
+#2 indicates that the function is applied to columns
+
+#double check
+sd(water_corr_inputs$w_ethylbenz_ln)
+
+#Remove columns with zero variance from the df; here it is w_ethylbenz_ln
+water_corr_inputs_clean <- water_corr_inputs[, !water_zero_variance_cols]
+dim(water_corr_inputs_clean)
+
+##Spearman correlations
+water_corr <- round(cor(water_corr_inputs_clean, method = "spearman"), 2)
+
+#calculate p-values for spearman correlations
+p_mat <- cor_pmat(water_corr_inputs_clean)
+
+#simple plot
+ggcorrplot(water_corr)
+
+#hierarchical clustering
+ggcorrplot(water_corr, hc.order = TRUE, outline.color = "white")
+
+#lower triangle
+ggcorrplot(water_corr,
+           hc.order = TRUE,
+           type = "lower",
+           outline.color = "white")
+
+#add correlation values onto plot
+ggcorrplot(water_corr,
+           hc.order = TRUE,
+           type = "lower",
+           lab = TRUE)
+
+#add correlation significance level
+#X marks the not signif correlations (Barring the no significant coefficient)
+ggcorrplot(water_corr,
+           hc.order = TRUE,
+           type = "lower",
+           p.mat = p_mat)
 ```
 
 ## Water PCA
@@ -618,54 +811,81 @@ The top 3 absolute loadings for Water PC1 are w_c2cl4_ln (Tetrachloroethylene), 
 
 The top 3 absolute loadings for Water PC2 are w_picloram_ln (Picloram), w_dinoseb_ln (Dinoseb), and w_endrin_ln (Endrin). These components are contributing the most to the variation captured in Water PC2.
 
-quantile reg
+# Quick Look at Correlations (using Spearman) for all pca input variables
 ```{r}
-eqi_lbw_clean_df <- eqi_lbw_clean_df |> 
-  mutate(cat_rucc = as.factor(cat_rucc, levels = c("metropolitan-urbanized", "less urbanized", "thinly populated", "nonmetropolitan-urbanized")))
+pca_inputs <- pca_input_variables_transformed_df[,5:143]
+dim(pca_inputs)
 
-colnames(eqi_lbw_clean_df)
+#Since Spearman correlation is based on ranks, a variable with zero variance (no variation) can't be ranked meaningfully.
 
-mod_50 <- rq.counts(num_low_birthweight_births ~ eqi + , data = eqi_lbw_clean_df, tau = 0.25, 
-                    offset = log_live_births, alpha = 0.05)
+#Identify columns with zero variance (constant columns)
+pca_inputs_zero_variance_cols <- apply(pca_inputs, 2, function(x) sd(x) == 0)
+#2 indicates that the function is applied to columns
 
-mod_50_st <- rq.counts(num_low_birthweight_births ~ eqi + cat_rucc + perc_smokers + perc_age1849, data = eqi_lbw_clean_df, tau = 0.25, 
-                    offset = log_live_births, alpha = 0.05)
+#double check
+sd(pca_inputs$w_ethylbenz_ln)
 
-min(eqi_lbw_clean_df$num_low_birthweight_births)
+#Remove columns with zero variance from the df; here it is w_ethylbenz_ln
+pca_inputs_clean <- pca_inputs[, !pca_inputs_zero_variance_cols]
+dim(pca_inputs_clean)
 
-summary.rq(mod_50)
-summary.rq(mod_50_st)
+##Spearman correlations
+corr_pca <- round(cor(pca_inputs_clean, method = "spearman"), 2)
 
-a <- log2(eqi_lbw_clean_df$num_low_birthweight_births)
+#calculate p-values for spearman correlations
+p_mat <- cor_pmat(pca_inputs_clean)
 
-eqi_lbw_clean_df |> select(fips, eqi_2q)
+#simple plot
+ggcorrplot(corr_pca)
 
-ModMean.Beta.pm.fit <- summary.rq(mod_50)$coefficients[2,1]
-ModMean.Beta.pm.se  <- summary.rq(mod_50)$coefficients[2,2]
-ModMean.Beta.pm.lci <- ModMean.Beta.pm.fit - 1.96 * ModMean.Beta.pm.se
-ModMean.Beta.pm.uci <- ModMean.Beta.pm.fit + 1.96 * ModMean.Beta.pm.se
+#hiearchial clustering
+ggcorrplot(corr_pca, hc.order = TRUE, outline.color = "white")
 
-print(paste0("Association for PM2.5 and Mean BMI: ", 
-             round(ModMean.Beta.pm.fit, 3), " 95% CI: (",
-             round(ModMean.Beta.pm.lci, 3), ", ", 
-             round(ModMean.Beta.pm.uci, 3), ")"))
+#lower triangle
+ggcorrplot(corr_pca,
+           hc.order = TRUE,
+           type = "lower",
+           outline.color = "white")
 
-#trying categorical
-new_df <- eqi_lbw_clean_df |> mutate(eqi_cat =  cut(eqi, 
-                  breaks = quantile(eqi, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE),
-                  labels = c("Excellent", "Good", "Fair", "Poor")))
+#add correlation values onto plot
+ggcorrplot(corr_pca,
+           hc.order = TRUE,
+           type = "lower",
+           lab = TRUE)
 
-table(new_df$eqi_cat)
-
-mod_50_cat <- rq.counts(num_low_birthweight_births ~ eqi_cat + cat_rucc + perc_age1849 + 
-                      perc_smokers, data = new_df, tau = 0.5, 
-                    offset = log_live_births, alpha = 0.05)
-
-summary.rq(mod_50_cat)
-
-hist(eqi_lbw_clean_df$eqi)
-
+#add correlation significance level
+#X marks the not signif correlations (Barring the no significant coefficient)
+ggcorrplot(corr_pca,
+           hc.order = TRUE,
+           type = "lower",
+           p.mat = p_mat)
 
 ```
 
+#Regression
+```{r}
+air_PC1_df <- air_pc_scores_df |> select(fips,PC1) |> rename(pc1_air = PC1)
+built_PC1_df <- built_pc_scores_df |> select(fips,PC1) |> rename(pc1_built = PC1)
+land_PC1_df <- land_pc_scores_df |> select(fips,PC1)|> rename(pc1_land = PC1)
+sociod_PC1_df <- sociod_pc_scores_df |> select(fips,PC1)|> rename(pc1_sociod = PC1)
+water_PC1_df <- water_pc_scores_df |> select(fips,PC1) |> rename(pc1_water = PC1)
 
+eqi_lbw_clean_df <- eqi_lbw_clean_df |> 
+  mutate(cat_rucc = factor(cat_rucc, levels = c("metropolitan-urbanized", "less urbanized", "thinly populated", "nonmetropolitan-urbanized")))
+
+a <- left_join(eqi_lbw_clean_df, air_PC1_df, by = "fips")
+b <- left_join(a, built_PC1_df, by = "fips")
+c <- left_join(b, land_PC1_df, by = "fips")
+d <- left_join(c, sociod_PC1_df, by = "fips")
+eqi_lbw_clean_pca_df <- left_join(d, water_PC1_df, by = "fips")
+
+mod = glm(num_low_birthweight_births ~ pc1_air + pc1_built + pc1_land + pc1_sociod + pc1_water + 
+             cat_rucc + perc_age1849 + perc_smokers, 
+          data = eqi_lbw_clean_pca_df, 
+          family = "quasipoisson", 
+          offset = log_live_births)
+
+summary(mod)
+
+```
+We cannot feasibly rerun the regression using our self-generated PC1s, because the EPA used a valence correction that we are unable to replicate. Thus, without applying the valence correction, the direction of our relationships are not consistent with EPA provided PC1s.
