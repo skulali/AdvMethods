@@ -20,6 +20,7 @@ library(table1)
 library(xlsx)
 library(cowplot)
 library(ggplot2)
+library(broom)
 ```
 
 ## Setting template
@@ -45,6 +46,8 @@ scale_fill_discrete = scale_fill_viridis_d
 ## Load dataset
 
 ```{r}
+# importing the main dataset
+
 eqi_lbw_clean_df = 
   read_csv("data/eqi_lbw_clean_df.csv") |> 
   mutate(cat_rucc = factor(cat_rucc, levels = c("metropolitan-urbanized", "less urbanized", "thinly populated", "nonmetropolitan-urbanized")))
@@ -52,7 +55,7 @@ eqi_lbw_clean_df =
 
 # Models
 
-## Main model
+## Main models
 
 ```{r}
 # eqi model
@@ -68,7 +71,7 @@ mod1_sum =
   mod1 |> 
   tidy(conf.int = TRUE) |> 
   mutate(
-    across(c(estimate, std.error, conf.low, conf.high), exp),
+    across(c(estimate, conf.low, conf.high), exp),
     across(where(is.numeric), ~round(., digits = 3))) |> 
   mutate(model = "1",
          model = as.factor(model),
@@ -89,7 +92,7 @@ mod2_sum =
   mod2 |> 
   tidy(conf.int = TRUE) |> 
   mutate(
-    across(c(estimate, std.error, conf.low, conf.high), exp),
+    across(c(estimate, conf.low, conf.high), exp),
     across(where(is.numeric), ~round(., digits = 3))) |> 
   mutate(model = "2",
          model = as.factor(model),
@@ -102,7 +105,7 @@ mod2_sum =
 main_models =
   bind_rows(mod1_sum, mod2_sum)
 
-#write_csv(main_models, "outputs/main_models.csv")
+# write_csv(main_models, "outputs/main_models.csv")
 ```
 
 ## Spline models
@@ -158,14 +161,18 @@ spline_models =
 # write_csv(spline_models, "outputs/spline_models.csv")
 ```
 
-# Plots
+## Plots
 
 ```{r}
 # creating a forrest plot of the main models
 
 main_models |> 
-  filter(term %in% c("eqi", "water", "air", "land", "built", "sociod", "perc_rural", "perc_age1849", "perc_smokers")) |> 
-  mutate(term = factor(term, levels = c("perc_smokers", "perc_age1849", "perc_rural", "sociod", "built", "land","air", "water","eqi"))) |> 
+  filter(term %in% c("eqi", "water", "air", "land", "built", "sociod", "cat_ruccless urbanized",
+                     "cat_ruccthinly populated", "cat_ruccnonmetropolitan-urbanized",
+                     "perc_age1849", "perc_smokers")) |> 
+  mutate(term = factor(term, levels = c("perc_smokers", "perc_age1849", "cat_ruccless urbanized",
+                     "cat_ruccthinly populated", "cat_ruccnonmetropolitan-urbanized", "sociod",
+                     "built", "land","air", "water","eqi"))) |> 
   ggplot(aes(x = estimate, y = term, color = model)) + 
   geom_pointrange(aes(xmin = conf.low, xmax = conf.high), size = 0.6, fatten = 2, position = position_dodge(width = 0.5)) +
   geom_vline(xintercept = 1, linetype = "dashed", color = "black") +
@@ -191,5 +198,306 @@ plot(mod4, select = 5, main = "F. Sociodemographic Quality Index")
 dev.off()
 ```
 
+## Sensitivity models
 
+### Water index
+
+#### Main models
+
+```{r}
+# importing the dataset with removed lower water eqi values
+
+eqi_lbw_sensitivity_df = 
+  read_csv("data/eqi_lbw_sensitivity_df.csv") |> 
+  mutate(cat_rucc = factor(cat_rucc, levels = c("metropolitan-urbanized", "less urbanized", "thinly populated", "nonmetropolitan-urbanized")))
+```
+
+```{r}
+# eqi model
+
+mod1w = glm(num_low_birthweight_births ~ eqi + cat_rucc + perc_age1849 + perc_smokers, 
+          data = eqi_lbw_sensitivity_df, 
+          family = "quasipoisson", 
+          offset = log_live_births)
+
+summary(mod1w)
+
+mod1w_sum =
+  mod1w |> 
+  tidy(conf.int = TRUE) |> 
+  mutate(
+     across(c(estimate, conf.low, conf.high), exp),
+     across(where(is.numeric), ~round(., digits = 3))) |> 
+  mutate(model = "1w",
+         model = as.factor(model),
+         term = as.factor(term))
+```
+
+```{r}
+# subset model
+
+mod2w = glm(num_low_birthweight_births ~ water + air + land + built + sociod + cat_rucc + perc_age1849 + perc_smokers, 
+          data = eqi_lbw_sensitivity_df, 
+          family = "quasipoisson", 
+          offset = log_live_births)
+
+summary(mod2w)
+
+mod2w_sum = 
+  mod2w |> 
+  tidy(conf.int = TRUE) |> 
+  mutate(
+     across(c(estimate, conf.low, conf.high), exp),
+     across(where(is.numeric), ~round(., digits = 3))) |> 
+  mutate(model = "2w",
+         model = as.factor(model),
+         term = as.factor(term))
+```
+
+```{r}
+# combining model 1w and 2w
+
+water_sens_models =
+  bind_rows(mod1w_sum, mod2w_sum)
+
+# write_csv(water_sens_models, "outputs/water_models.csv")
+```
+
+```{r}
+# combining model 1, 2, 1w, and 2w
+
+main_water_models =
+  bind_rows(mod1_sum, mod2_sum, mod1w_sum, mod2w_sum)
+
+# write_csv(main_water_models, "outputs/main_water_models.csv")
+```
+
+#### Spline models
+
+```{r}
+# eqi model
+
+mod3w = gam(num_low_birthweight_births ~ s(eqi) + s(perc_rural) + s(perc_age1849) + s(perc_smokers), 
+          data = eqi_lbw_sensitivity_df, 
+          family = "quasipoisson", 
+          offset = log_live_births)
+
+summary(mod3w)
+plot(mod3w)
+
+mod3w_sum =
+  mod3w |> 
+  tidy() |> 
+  mutate(
+    across(where(is.numeric), ~round(., digits = 3))) |> 
+  mutate(model = "3w",
+         model = as.factor(model),
+         term = as.factor(term))
+```
+
+```{r}
+# subset model
+
+mod4w = gam(num_low_birthweight_births ~ s(water) + s(air) + s(land) + s(built) + s(sociod) + s(perc_rural) + s(perc_age1849) + s(perc_smokers), 
+          data = eqi_lbw_sensitivity_df, 
+          family = "quasipoisson", 
+          offset = log_live_births)
+
+summary(mod4w)
+plot(mod4w)
+
+mod4w_sum =
+  mod4w |> 
+  tidy() |> 
+  mutate(
+    across(where(is.numeric), ~round(., digits = 3))) |> 
+  mutate(model = "4w",
+         model = as.factor(model),
+         term = as.factor(term))
+```
+
+```{r}
+# combining model 3w and 4w
+
+spline_water_models =
+  bind_rows(mod3w_sum, mod4w_sum)
+
+# write_csv(spline_water_models, "outputs/spline_water_models.csv")
+```
+
+#### Plots
+
+```{r}
+# creating a forrest plot of the main models
+
+water_sens_models |> 
+  filter(term %in% c("eqi", "water", "air", "land", "built", "sociod", "cat_ruccless urbanized",
+                     "cat_ruccthinly populated", "cat_ruccnonmetropolitan-urbanized",
+                     "perc_age1849", "perc_smokers")) |> 
+  mutate(term = factor(term, levels = c("perc_smokers", "perc_age1849", "cat_ruccless urbanized",
+                     "cat_ruccthinly populated", "cat_ruccnonmetropolitan-urbanized", "sociod",
+                     "built", "land","air", "water","eqi"))) |> 
+  ggplot(aes(x = estimate, y = term, color = model)) + 
+  geom_pointrange(aes(xmin = conf.low, xmax = conf.high), size = 0.6, fatten = 2, position = position_dodge(width = 0.5)) +
+  geom_vline(xintercept = 1, linetype = "dashed", color = "black") +
+  labs(title = "Association Between Environmental Quality Index and Low Birth Weights",
+       x = "Risk Ratio (95% CI)",
+       y = "Coefficients")
+  theme_minimal() + 
+    theme(plot.title = element(hjust = 0.5, facr = "bold"),
+          axis.text = element_text(size = 10))
+```
+
+```{r, eval = F}
+# creating a spline plot
+
+png("outputs/combined_water_splines_plot.png", width = 14, height = 8, units = "in", res = 600)
+par(mfrow = c(2, 3), mar = c(4, 4, 2, 1), cex.main = 0.9)
+plot(mod3w, select = 1, main = "A. EQI")
+plot(mod4w, select = 1, main = "B. Water Quality Index")
+plot(mod4w, select = 2, main = "C. Air Quality Index")
+plot(mod4w, select = 3, main = "D. Land Quality Index")
+plot(mod4w, select = 4, main = "E. Built Quality Index")
+plot(mod4w, select = 5, main = "F. Sociodemographic Quality Index")
+dev.off()
+```
+
+### Race and Ethnicity
+
+#### Main models
+
+```{r}
+# eqi model
+
+mod1r = glm(num_low_birthweight_births ~ eqi*perc_white + eqi*perc_black + eqi*perc_AIAN + eqi*perc_asian + eqi*perc_islander + eqi*perc_hisp + cat_rucc + perc_age1849 + perc_smokers, 
+          data = eqi_lbw_clean_df, 
+          family = "quasipoisson", 
+          offset = log_live_births)
+
+mod1r_sum = 
+  mod1r |> 
+  tidy(conf.int = TRUE) |> 
+  mutate(
+    across(c(estimate, conf.low, conf.high), exp),
+    across(where(is.numeric), ~round(., digits = 3))) |> 
+  mutate(model = "1r",
+         model = as.factor(model),
+         term = as.factor(term))
+```
+
+```{r}
+# subset model
+
+## water index
+
+mod2r.w = glm(num_low_birthweight_births ~ water*perc_white + water*perc_black + water*perc_AIAN + water*perc_asian + water*perc_islander + water*perc_hisp + air + land + built + sociod + cat_rucc + perc_age1849 + perc_smokers, 
+          data = eqi_lbw_clean_df, 
+          family = "quasipoisson", 
+          offset = log_live_births)
+
+mod2r.w_sum = 
+  mod2r.w |> 
+  tidy(conf.int = TRUE) |> 
+  mutate(
+    across(c(estimate, conf.low, conf.high), exp),
+    across(where(is.numeric), ~round(., digits = 3))) |> 
+  mutate(model = "2r.w",
+         model = as.factor(model),
+         term = as.factor(term))
+
+## air index
+
+mod2r.a = glm(num_low_birthweight_births ~ air*perc_white + air*perc_black + air*perc_AIAN + air*perc_asian + air*perc_islander + air*perc_hisp + water + land + built + sociod + cat_rucc + perc_age1849 + perc_smokers, 
+          data = eqi_lbw_clean_df, 
+          family = "quasipoisson", 
+          offset = log_live_births)
+
+mod2r.a_sum = 
+  mod2r.a |> 
+  tidy(conf.int = TRUE) |> 
+  mutate(
+    across(c(estimate, conf.low, conf.high), exp),
+    across(where(is.numeric), ~round(., digits = 3))) |> 
+  mutate(model = "2r.a",
+         model = as.factor(model),
+         term = as.factor(term))
+
+## land index
+
+mod2r.l = glm(num_low_birthweight_births ~ land*perc_white + land*perc_black + land*perc_AIAN + land*perc_asian + land*perc_islander + land*perc_hisp + air + water + built + sociod + cat_rucc + perc_age1849 + perc_smokers, 
+          data = eqi_lbw_clean_df, 
+          family = "quasipoisson", 
+          offset = log_live_births)
+
+mod2r.l_sum = 
+  mod2r.l |> 
+  tidy(conf.int = TRUE) |> 
+  mutate(
+    across(c(estimate, conf.low, conf.high), exp),
+    across(where(is.numeric), ~round(., digits = 3))) |> 
+  mutate(model = "2r.l",
+         model = as.factor(model),
+         term = as.factor(term))
+
+## built index
+
+mod2r.b = glm(num_low_birthweight_births ~ built*perc_white + built*perc_black + built*perc_AIAN + built*perc_asian + built*perc_islander + built*perc_hisp + air + land + water + sociod + cat_rucc + perc_age1849 + perc_smokers, 
+          data = eqi_lbw_clean_df, 
+          family = "quasipoisson", 
+          offset = log_live_births)
+
+mod2r.b_sum = 
+  mod2r.b |> 
+  tidy(conf.int = TRUE) |> 
+  mutate(
+    across(c(estimate, conf.low, conf.high), exp),
+    across(where(is.numeric), ~round(., digits = 3))) |> 
+  mutate(model = "2r.b",
+         model = as.factor(model),
+         term = as.factor(term))
+
+## sociod index
+
+mod2r.s = glm(num_low_birthweight_births ~ sociod*perc_white + sociod*perc_black + sociod*perc_AIAN + sociod*perc_asian + sociod*perc_islander + sociod*perc_hisp + air + land + built + water + cat_rucc + perc_age1849 + perc_smokers, 
+          data = eqi_lbw_clean_df, 
+          family = "quasipoisson", 
+          offset = log_live_births)
+
+mod2r.s_sum = 
+  mod2r.s |> 
+  tidy(conf.int = TRUE) |> 
+  mutate(
+    across(c(estimate, conf.low, conf.high), exp),
+    across(where(is.numeric), ~round(., digits = 3))) |> 
+  mutate(model = "2r.s",
+         model = as.factor(model),
+         term = as.factor(term))
+```
+
+```{r}
+# combining model 1w and 2w
+
+race_models =
+  bind_rows(mod1r_sum, mod2r.w_sum, mod2r.a_sum, mod2r.l_sum, mod2r.b_sum, mod2r.s_sum)
+
+# write_csv(race_models, "outputs/race_models.csv")
+```
+
+#### Plots
+
+```{r}
+# creating a forrest plot of the main models
+
+race_models |> 
+  filter(str_detect(term, "white|black|asian|AIAN|islander|hisp")) |> 
+  ggplot(aes(x = estimate, y = term, color = model)) + 
+  geom_pointrange(aes(xmin = conf.low, xmax = conf.high), size = 0.6, fatten = 2, position = position_dodge(width = 0.5)) +
+  geom_vline(xintercept = 1, linetype = "dashed", color = "black") +
+  labs(title = "Association Between Environmental Quality Index and Low Birth Weights",
+       x = "Risk Ratio (95% CI)",
+       y = "Coefficients")
+  theme_minimal() + 
+    theme(plot.title = element(hjust = 0.5, facr = "bold"),
+          axis.text = element_text(size = 10))
+```
 
