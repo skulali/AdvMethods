@@ -19,6 +19,9 @@ library(ggcorrplot)
 library(table1)
 library(cowplot)
 library(ggplot2)
+library(Qtools)
+library(quantreg)
+library(broom)
 ```
 
 ## Setting template
@@ -44,23 +47,13 @@ scale_fill_discrete = scale_fill_viridis_d
 ## Load dataset
 
 ```{r}
-library(readr)
-library(tidyverse)
-#eqi_lbw_clean_df <- read_csv("~/Desktop/Files/AAMES/data/eqi_lbw_clean_df.csv")
-```
-```{r}
-#install.packages("Qtools")
-```
-```{r}
-library(Qtools)
-library(quantreg)
+eqi_lbw_clean_df = 
+  read_csv("data/eqi_lbw_clean_df.csv") |> 
+  mutate(cat_rucc = factor(cat_rucc, levels = c("metropolitan-urbanized", "less urbanized", "thinly populated", "nonmetropolitan-urbanized")))
 ```
 
 # EQI 25th 
 ```{r}
-eqi_lbw_clean_df |>
-  mutate(cat_rucc = factor(rucc, levels = c("metropolitan-urbanized", "less urbanized", "thinly populated", "nonmetropolitan-urbanized")))
-
 Mods25_eqi <- rq.counts(num_low_birthweight_births ~ eqi + cat_rucc + perc_smokers + perc_age1849, 
             data = eqi_lbw_clean_df, tau= 0.25, offset= log_live_births, alpha =0.05)
 
@@ -209,9 +202,155 @@ summary50_sociod <- summary.rq(Mods50_sociod, alpha = 0.05)
 summary75_sociod <- summary.rq(Mods75_sociod, alpha = 0.05)
 ```
 
+#Extracting upper and lower limits 
+```{r}
+# Coeff.land.25 <- summary25_land$coefficients[2,]
+land.25.Beta.pm.fit <- summary25_land$coefficients[2,1]
+land.25.Beta.pm.se  <- summary25_land$coefficients[2,2]
+land.25.Beta.pm.lci <- land.25.Beta.pm.fit - 1.96 * land.25.Beta.pm.se
+land.25.Beta.pm.uci <- land.25.Beta.pm.fit + 1.96 * land.25.Beta.pm.se
+```
 
 ```{r}
-land_Model25th   <- c(summary25_land$coefficients[2,1:3])
+#Coeff.land.50 <- summary50_land)$coefficients[2,]
+land.50.Beta.pm.fit <- summary50_land$coefficients[2,1]
+land.50.Beta.pm.se  <- summary50_land$coefficients[2,2]
+land.50.Beta.pm.lci <- land.50.Beta.pm.fit - 1.96 * land.50.Beta.pm.se
+land.50.Beta.pm.uci <- land.50.Beta.pm.fit + 1.96 * land.50.Beta.pm.se
+```
+
+```{r}
+#Coeff.land.75 <- summary75_land)$coefficients[2,]
+land.75.Beta.pm.fit <- summary75_land$coefficients[2,1]
+land.75.Beta.pm.se  <- summary75_land$coefficients[2,2]
+land.75.Beta.pm.lci <- land.75.Beta.pm.fit - 1.96 * land.75.Beta.pm.se
+land.75.Beta.pm.uci <- land.75.Beta.pm.fit + 1.96 * land.75.Beta.pm.se
+```
+
+```{r}
+Coeff.air.25 <- summary(summary25_air)$coefficients[2,]
+air.25.Beta.pm.fit <- summary(summary25_air)$coefficients[2,1]
+air.25.Beta.pm.se  <- summary(summary25_air)$coefficients[2,2]
+air.25.Beta.pm.lci <- air.25.Beta.pm.fit - 1.96 * air.25.Beta.pm.se
+air.25.Beta.pm.uci <- air.25.Beta.pm.fit + 1.96 * air.25.Beta.pm.se
+```
+
+```{r}
+Coeff.air.50 <- summary(summary50_air)$coefficients[2,]
+air.50.Beta.pm.fit <- summary(summary50_air)$coefficients[2,1]
+air.50.Beta.pm.se  <- summary(summary50_air)$coefficients[2,2]
+air.50.Beta.pm.lci <- air.50.Beta.pm.fit - 1.96 * air.50.Beta.pm.se
+air.50.Beta.pm.uci <- air.50.Beta.pm.fit + 1.96 * air.50.Beta.pm.se
+```
+
+```{r}
+Coeff.air.75 <- summary(summary75_air)$coefficients[2,]
+air.75.Beta.pm.fit <- summary(summary75_air)$coefficients[2,1]
+air.75.Beta.pm.se  <- summary(summary75_air)$coefficients[2,2]
+air.75.Beta.pm.lci <- air.75.Beta.pm.fit - 1.96 * air.75.Beta.pm.se
+air.75.Beta.pm.uci <- air.75.Beta.pm.fit + 1.96 * air.75.Beta.pm.se
+```
+
+```{r}
+Coeff.water.25 <- summary(summary25_water)$coefficients[2,]
+water.25.Beta.pm.fit <- summary(summary25_water)$coefficients[2,1]
+water.25.Beta.pm.se  <- summary(summary25_water)$coefficients[2,2]
+water.25.Beta.pm.lci <- water.25.Beta.pm.fit - 1.96 * water.25.Beta.pm.se
+water.25.Beta.pm.uci <- water.25.Beta.pm.fit + 1.96 * water.25.Beta.pm.se
+```
+
+```{r}
+Coeff.water.50 <- summary(summary50_water)$coefficients[2,]
+water.50.Beta.pm.fit <- summary(summary50_water)$coefficients[2,1]
+water.50.Beta.pm.se  <- summary(summary50_water)$coefficients[2,2]
+water.50.Beta.pm.lci <- water.50.Beta.pm.fit - 1.96 * water.50.Beta.pm.se
+water.50.Beta.pm.uci <- water.50.Beta.pm.fit + 1.96 * water.50.Beta.pm.se
+```
+
+```{r}
+Coeff.water.75 <- summary(summary75_water)$coefficients[2,]
+water.75.Beta.pm.fit <- summary(summary75_water)$coefficients[2,1]
+water.75.Beta.pm.se  <- summary(summary75_water)$coefficients[2,2]
+water.75.Beta.pm.lci <- water.75.Beta.pm.fit - 1.96 * water.75.Beta.pm.se
+water.75.Beta.pm.uci <- water.75.Beta.pm.fit + 1.96 * water.75.Beta.pm.se
+```
+
+```{r}
+Coeff.built.25 <- summary(summary25_built)$coefficients[2,]
+built.25.Beta.pm.fit <- summary(summary25_built)$coefficients[2,1]
+built.25.Beta.pm.se  <- summary(summary25_built)$coefficients[2,2]
+built.25.Beta.pm.lci <- built.25.Beta.pm.fit - 1.96 * built.25.Beta.pm.se
+built.25.Beta.pm.uci <- built.25.Beta.pm.fit + 1.96 * built.25.Beta.pm.se
+```
+
+```{r}
+Coeff.built.50 <- summary(summary50_built)$coefficients[2,]
+built.50.Beta.pm.fit <- summary(summary50_built)$coefficients[2,1]
+built.50.Beta.pm.se  <- summary(summary50_built)$coefficients[2,2]
+built.50.Beta.pm.lci <- built.50.Beta.pm.fit - 1.96 * built.50.Beta.pm.se
+built.50.Beta.pm.uci <- built.50.Beta.pm.fit + 1.96 * built.50.Beta.pm.se
+```
+
+```{r}
+Coeff.built.75 <- summary(summary75_built)$coefficients[2,]
+built.75.Beta.pm.fit <- summary(summary75_built)$coefficients[2,1]
+built.75.Beta.pm.se  <- summary(summary75_built)$coefficients[2,2]
+built.75.Beta.pm.lci <- built.75.Beta.pm.fit - 1.96 * built.75.Beta.pm.se
+built.75.Beta.pm.uci <- built.75.Beta.pm.fit + 1.96 * built.75.Beta.pm.se
+```
+
+```{r}
+Coeff.sociod.25 <- summary(summary25_sociod)$coefficients[2,]
+sociod.25.Beta.pm.fit <- summary(summary25_sociod)$coefficients[2,1]
+sociod.25.Beta.pm.se  <- summary(summary25_sociod)$coefficients[2,2]
+sociod.25.Beta.pm.lci <- sociod.25.Beta.pm.fit - 1.96 * sociod.25.Beta.pm.se
+sociod.25.Beta.pm.uci <- sociod.25.Beta.pm.fit + 1.96 * sociod.25.Beta.pm.se
+```
+
+```{r}
+Coeff.sociod.50 <- summary(summary50_sociod)$coefficients[2,]
+sociod.50.Beta.pm.fit <- summary(summary50_sociod)$coefficients[2,1]
+sociod.50.Beta.pm.se  <- summary(summary50_sociod)$coefficients[2,2]
+sociod.50.Beta.pm.lci <- sociod.50.Beta.pm.fit - 1.96 * sociod.50.Beta.pm.se
+sociod.50.Beta.pm.uci <- sociod.50.Beta.pm.fit + 1.96 * sociod.50.Beta.pm.se
+```
+
+```{r}
+Coeff.sociod.75 <- summary(summary75_sociod)$coefficients[2,]
+sociod.75.Beta.pm.fit <- summary(summary75_sociod)$coefficients[2,1]
+sociod.75.Beta.pm.se  <- summary(summary75_sociod)$coefficients[2,2]
+sociod.75.Beta.pm.lci <- sociod.75.Beta.pm.fit - 1.96 * sociod.75.Beta.pm.se
+sociod.75.Beta.pm.uci <- sociod.75.Beta.pm.fit + 1.96 * sociod.75.Beta.pm.se
+```
+
+```{r}
+Coeff.eqi.25 <- summary(summary25_eqi)$coefficients[2,]
+eqi.25.Beta.pm.fit <- summary(summary25_eqi)$coefficients[2,1]
+eqi.25.Beta.pm.se  <- summary(summary25_eqi)$coefficients[2,2]
+eqi.25.Beta.pm.lci <- eqi.25.Beta.pm.fit - 1.96 * eqi.25.Beta.pm.se
+eqi.25.Beta.pm.uci <- eqi.25.Beta.pm.fit + 1.96 * eqi.25.Beta.pm.se
+```
+
+```{r}
+Coeff.eqi.50 <- summary(summary50_eqi)$coefficients[2,]
+eqi.50.Beta.pm.fit <- summary(summary50_eqi)$coefficients[2,1]
+eqi.50.Beta.pm.se  <- summary(summary50_eqi)$coefficients[2,2]
+eqi.50.Beta.pm.lci <- eqi.50.Beta.pm.fit - 1.96 * eqi.50.Beta.pm.se
+eqi.50.Beta.pm.uci <- eqi.50.Beta.pm.fit + 1.96 * eqi.50.Beta.pm.se
+```
+
+```{r}
+Coeff.eqi.75 <- summary(summary75_eqi)$coefficients[2,]
+eqi.75.Beta.pm.fit <- summary(summary75_eqi)$coefficients[2,1]
+eqi.75.Beta.pm.se  <- summary(summary75_eqi)$coefficients[2,2]
+eqi.75.Beta.pm.lci <- eqi.75.Beta.pm.fit - 1.96 * eqi.75.Beta.pm.se
+eqi.75.Beta.pm.uci <- eqi.75.Beta.pm.fit + 1.96 * eqi.75.Beta.pm.se
+```
+
+# Summaries 
+
+```{r}
+land_Model25th   <- cbind(land.25.Beta.pm.fit, land.25.Beta.pm.se, land.25.Beta.pm.lci, land.25.Beta.pm.uci)
 land_Model50th   <- c(summary50_land$coefficients[2,1:3])
 land_Model75th   <- c(summary75_land$coefficients[2,1:3])
 ```
@@ -241,14 +380,14 @@ eqi_Model75th   <- c(summary75_eqi$coefficients[2,1:3])
 ```
 
 ```{r}
-land_coeff.table <- rbind(land_Model25th, land_Model50th, land_Model75th)
-land_coeff.table <- as.data.frame(land_coeff.table, stringsAsFactors = FALSE)
+#land_coeff.table <- rbind(land_Model25th, land_Model50th, land_Model75th)
+land_coeff.table <- as.data.frame(land_Model25th, stringsAsFactors = FALSE)
 
 # set names for dataframe
 
-names(land_coeff.table) <- c("coeff", "lci", "uci")
+names(land_coeff.table) <- c("coeff", "se","lci", "uci")
 land_coeff.table        <- land_coeff.table %>% 
-                      mutate(ModelName = c("land_Model 25th", "land_Model 50th", "land_Model 75th")) 
+                      mutate(ModelName = c("land_Model 25th")) 
 
 #  Plot
 
