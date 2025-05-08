@@ -19,6 +19,7 @@ library(janitor)
 library(factoextra)
 library(Qtools)
 library(quantreg)
+library(patchwork)
 
 
 ```
@@ -118,10 +119,12 @@ ggcorrplot(air_corr)
 ggcorrplot(air_corr, hc.order = TRUE, outline.color = "white")
 
 #lower triangle
-ggcorrplot(air_corr,
+air_cor_plot <- ggcorrplot(air_corr,
            hc.order = TRUE,
            type = "lower",
-           outline.color = "white")
+           outline.color = "white") + 
+  ggtitle("Air Domain") 
+
 
 #add correlation values onto plot
 ggcorrplot(air_corr,
@@ -151,8 +154,12 @@ summary(air_pca)
 get_eig(air_pca)
 
 #Air screeplot; percentage of total variance explained by each PC
-fviz_eig(air_pca, main = "Air PCA",
-         xlab = "Principal component", addlabels=TRUE)
+air_screeplot <- fviz_eig(air_pca, main = "Air PCA",
+         xlab = "Principal component", addlabels=TRUE) +
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1)))  # Add 10% space on top
+
+
 
 ```
 Air PC1 explains 28.1% of the total variation in the Air subdomain.
@@ -198,13 +205,17 @@ air_pc_loadings_df |>
   labs(title = "Air PC1 Loadings")
 
 #Top 3 loadings with greatest magnitude in PC1
-air_pc_loadings_df |> 
+air_top3 <- air_pc_loadings_df |> 
   arrange(desc(abs(PC1))) |> 
   slice(1:3) |> 
   ggplot(aes(x = reorder(air_components, -abs(PC1)), y = PC1)) + # ordered by descending absolute values
   geom_col() +
   theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title = "Air PC1: Top 3 Absolute Loadings")
+  labs(title = "Air PC1: Top 3 Absolute Loadings",
+       x = "Air Domain") +
+  scale_x_discrete(labels = c("a_ebenzine_ln" = "Ethylbenzene",
+                              "a_c2hcl3_ln" = "Trichloroethylene",
+                              "a_co_ln" = "Cobalt compounds"))
 
 ```
 The top 3 absolute loadings for Air PC1 are a_ebenzine_ln (Ethylbenzene), a_c2hcl3_ln (Trichloroethylene), and a_co_ln (Cobalt compounds). These components are contributing the most to the variation captured in Air PC1.
@@ -246,10 +257,11 @@ ggcorrplot(built_corr)
 ggcorrplot(built_corr, hc.order = TRUE, outline.color = "white")
 
 #lower triangle
-ggcorrplot(built_corr,
+built_cor_plot <- ggcorrplot(built_corr,
            hc.order = TRUE,
            type = "lower",
-           outline.color = "white")
+           outline.color = "white") + 
+  ggtitle("Built Domain") 
 
 #add correlation values onto plot
 ggcorrplot(built_corr,
@@ -279,8 +291,12 @@ summary(built_pca)
 get_eig(built_pca)
 
 #Built screeplot; percentage of total variance explained by each PC
-fviz_eig(built_pca, main = "Built PCA",
-         xlab = "Principal component", addlabels=TRUE)
+built_screeplot <- fviz_eig(built_pca, main = "Built PCA",
+         xlab = "Principal component", addlabels=TRUE) + 
+  theme(plot.title = element_text(hjust = 0.5)) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1)))  # Add 10% space on top
+
+
 
 ```
 Built PC1 explains 25.3% of the total variation in the Built subdomain.
@@ -325,13 +341,18 @@ built_pc_loadings_df |>
   labs(title = "Built PC1 Loadings")
 
 #Top 3 loadings with greatest magnitude in PC1
-built_pc_loadings_df |> 
+built_top3 <- built_pc_loadings_df |> 
   arrange(desc(abs(PC1))) |> 
   slice(1:3) |> 
   ggplot(aes(x = reorder(built_components, -abs(PC1)), y = PC1)) + # ordered by descending absolute values
   geom_col() +
   theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title = "Built PC1: Top 3 Absolute Loadings")
+  labs(title = "Built PC1: Top 3 Absolute Loadings",
+       x = "Built Domain") +
+  scale_x_discrete(labels = c("ss_env_rate_ln" = "Rate Social Service\nAgences",
+                              "rec_env_rate_ln" = "Rate Recreation-Related\nBusinesses",
+                              "ed_env_rate_ln" = "Rate Education-Related\nBusinesses"))
+
 
 ```
 The top 3 absolute loadings for Built PC1 are ss_env_rate_ln (Rate of social service agencies per county), rec_env_rate_ln (Rate of recreation-related businesses per county), and ed_env_rate_ln (Rate of education-related business per county). These components are contributing the most to the variation captured in Built PC1.
@@ -373,10 +394,12 @@ ggcorrplot(land_corr)
 ggcorrplot(land_corr, hc.order = TRUE, outline.color = "white")
 
 #lower triangle
-ggcorrplot(land_corr,
+land_cor_plot <- ggcorrplot(land_corr,
            hc.order = TRUE,
            type = "lower",
-           outline.color = "white")
+           outline.color = "white") + 
+  ggtitle("Land Domain") 
+
 
 #add correlation values onto plot
 ggcorrplot(land_corr,
@@ -406,8 +429,10 @@ summary(land_pca)
 get_eig(land_pca)
 
 #Land screeplot; percentage of total variance explained by each PC
-fviz_eig(land_pca, main = "Land PCA",
-         xlab = "Principal component", addlabels=TRUE)
+land_screeplot <- fviz_eig(land_pca, main = "Land PCA",
+         xlab = "Principal component", addlabels=TRUE) + 
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1)))  # Add 10% space on top
 
 ```
 Land PC1 explains 27.7% of the total variation in the Land subdomain. PC2 explains 14.2% of total variation in Land subdomain.
@@ -452,13 +477,18 @@ land_pc_loadings_df |>
   labs(title = "Land PC1 Loadings")
 
 #Top 3 loadings with greatest magnitude in PC1
-land_pc_loadings_df |> 
+land_top3 <- land_pc_loadings_df |> 
   arrange(desc(abs(PC1))) |> 
   slice(1:3) |> 
   ggplot(aes(x = reorder(land_components, -abs(PC1)), y = PC1)) + #ordered by descending absolute values
   geom_col() +
   theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title = "Land PC1: Top 3 Absolute Loadings")
+  labs(title = "Land PC1: Top 3 Absolute Loadings",
+       x = "Land Domain") +
+    scale_x_discrete(labels = c("pct_harvested_acres_ln" = "% Harvested\nAcres",
+                              "pct_disease_acres_ln" = "% Crops Treated\nwith Chemicals",
+                              "pct_manure_acres_ln" = "% Manure\n Per Acre"))
+
 
 #Graph of All loadings in PC2
 land_pc_loadings_df |> 
@@ -518,10 +548,11 @@ ggcorrplot(sociod_corr)
 ggcorrplot(sociod_corr, hc.order = TRUE, outline.color = "white")
 
 #lower triangle
-ggcorrplot(sociod_corr,
+sociod_cor_plot <- ggcorrplot(sociod_corr,
            hc.order = TRUE,
            type = "lower",
-           outline.color = "white")
+           outline.color = "white") + 
+  ggtitle("Sociodemographic Domain") 
 
 #add correlation values onto plot
 ggcorrplot(sociod_corr,
@@ -551,8 +582,10 @@ summary(sociod_pca)
 get_eig(sociod_pca)
 
 #Built screeplot; percentage of total variance explained by each PC
-fviz_eig(sociod_pca, main = "Sociod PCA",
-         xlab = "Principal component", addlabels=TRUE)
+sociod_screeplot <- fviz_eig(sociod_pca, main = "Sociod PCA",
+         xlab = "Principal component", addlabels=TRUE) + 
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1)))  # Add 10% space on top
 
 ```
 Sociod PC1 explains 29.9% of the total variation in the Sociod subdomain.
@@ -598,13 +631,18 @@ sociod_pc_loadings_df |>
   labs(title = "Sociod PC1 Loadings")
 
 #Top 3 loadings with greatest magnitude in PC1
-sociod_pc_loadings_df |> 
+sociod_top3 <- sociod_pc_loadings_df |> 
   arrange(desc(abs(PC1))) |> 
   slice(1:3) |> 
   ggplot(aes(x = reorder(sociod_components, -abs(PC1)), y = PC1)) + # ordered by descending absolute values
   geom_col() +
   theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title = "Sociod PC1: Top 3 Absolute Loadings")
+  labs(title = "Sociod PC1: Top 3 Absolute Loadings",
+       x = "Sociodemographic Domain") +
+  scale_x_discrete(labels = c("num_creatclass" = "% Employed in\nCreative Class",
+                              "pct_bs" = "% Bachelor's Degree\nor Higher",
+                              "med_hh_value" = "Median Household\nValue"))
+
 
 #Graph of All loadings in PC2
 sociod_pc_loadings_df |> 
@@ -678,10 +716,12 @@ ggcorrplot(water_corr)
 ggcorrplot(water_corr, hc.order = TRUE, outline.color = "white")
 
 #lower triangle
-ggcorrplot(water_corr,
+water_cor_plot <- ggcorrplot(water_corr,
            hc.order = TRUE,
            type = "lower",
-           outline.color = "white")
+           outline.color = "white") + 
+  ggtitle("Water Domain") 
+
 
 #add correlation values onto plot
 ggcorrplot(water_corr,
@@ -734,8 +774,11 @@ summary(water_pca)
 get_eig(water_pca)
 
 #Built screeplot; percentage of total variance explained by each PC
-fviz_eig(water_pca, main = "Water PCA",
-         xlab = "Principal component", addlabels=TRUE)
+water_screeplot <- fviz_eig(water_pca, main = "Water PCA",
+         xlab = "Principal component", addlabels=TRUE) + 
+  theme(plot.title = element_text(hjust = 0.5)) + 
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1)))  # Add 10% space on top
+
 
 ```
 Water PC1 explains 42% of the total variation in the Water subdomain.
@@ -781,13 +824,18 @@ water_pc_loadings_df |>
   labs(title = "Water PC1 Loadings")
 
 #Top 3 loadings with greatest magnitude in PC1
-water_pc_loadings_df |> 
+water_top3 <- water_pc_loadings_df |> 
   arrange(desc(abs(PC1))) |> 
   slice(1:3) |> 
   ggplot(aes(x = reorder(water_components, -abs(PC1)), y = PC1)) + # ordered by descending absolute values
   geom_col() +
   theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title = "Water PC1: Top 3 Absolute Loadings")
+  labs(title = "Water PC1: Top 3 Absolute Loadings",
+       x = "Water Domain") +
+  scale_x_discrete(labels = c("w_c2cl4_ln" = "Tetrachloroethylene",
+                              "w_trichlorene_ln" = "Trichloroethylene",
+                              "w_benzene_ln" = "Monochlorobenzene"))
+
 
 #Graph of All loadings in PC2
 water_pc_loadings_df |> 
@@ -888,3 +936,21 @@ summary(mod)
 
 ```
 We cannot feasibly rerun the regression using our self-generated PC1s, because the EPA used a valence correction that we are unable to replicate. Thus, without applying the valence correction, the direction of our relationships are not consistent with EPA provided PC1s.
+
+#Figure with all correlations
+```{r}
+air_cor_plot + built_cor_plot + land_cor_plot + sociod_cor_plot + water_cor_plot
+```
+
+#Figure with all elbow plots
+```{r}
+air_screeplot + built_screeplot + land_screeplot + sociod_screeplot + water_screeplot
+```
+
+
+#Figure with all 3 top loadings
+```{r}
+air_top3 + built_top3 + land_top3 + sociod_top3 + water_top3
+
+```
+

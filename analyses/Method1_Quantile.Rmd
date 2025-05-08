@@ -22,6 +22,8 @@ library(ggplot2)
 library(Qtools)
 library(quantreg)
 library(broom)
+library(patchwork)
+
 ```
 
 ## Setting template
@@ -341,7 +343,7 @@ sociod_plot <- ggplot(data=sociod_summaries, # defines what dataset we are using
   geom_errorbar()+             # creates lines with bars
   geom_hline(aes(yintercept=0.0), lty=2) + # add a dashed line at y=0 
   labs( 
-    title = "Sociod",
+    title = "Sociodemographic",
     x = "Quantile",
     y=(expression("Risk Ratio "~" (95% CI)")) #label for axes
   )
@@ -373,6 +375,12 @@ water_plot
 
 ```
 
+#Figure with all plots
+```{r}
+eqi_plot + air_plot + built_plot + land_plot + sociod_plot + water_plot
+
+
+```
 
 #####END OF CODE#####
 ###Below is older code###
